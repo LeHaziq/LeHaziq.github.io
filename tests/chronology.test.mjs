@@ -41,7 +41,7 @@ test("the Portfolio renders the approved compact chronology", async () => {
 
   assert.match(
     rootPage,
-    /Machine learning, deep learning, and computer-vision research; CNN and transformer testing; research and technical writing\./,
+    /Machine learning, deep learning, and computer-vision research; CNN and transformer testing; research or technical writing\./,
   );
   assert.match(
     rootPage,

@@ -97,7 +97,8 @@ h1 {
   text-decoration: none;
 }
 
-.academic-projects {
+.academic-projects,
+.chronology {
   display: grid;
   grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
   gap: clamp(2rem, 7vw, 7rem);
@@ -106,12 +107,7 @@ h1 {
 }
 
 .chronology {
-  display: grid;
-  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
-  gap: clamp(2rem, 7vw, 7rem);
   margin-top: clamp(1rem, 4vw, 3rem);
-  padding-top: clamp(3rem, 7vw, 5rem);
-  border-top: 0.125rem solid #171717;
 }
 
 .section-heading h2 {
@@ -278,10 +274,7 @@ h1 {
     flex-direction: column;
   }
 
-  .academic-projects {
-    grid-template-columns: 1fr;
-  }
-
+  .academic-projects,
   .chronology {
     grid-template-columns: 1fr;
   }
