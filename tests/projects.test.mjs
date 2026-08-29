@@ -235,14 +235,16 @@ test("the generated Portfolio omits prohibited MyConference claims", async () =>
   const prohibitedOutput = [
     /public demo/i,
     /production customer/i,
-    /broad adoption/i,
-    /register for MyConference/i,
-    /public source proof/i,
-    /external accessibility audit/i,
-    /current green CI/i,
+    /(?:broad adoption|broadly adopted)/i,
+    /\b(?:register|sign up|create an account)\b/i,
+    /(?:public|open-source) (?:repository|repo|source code)/i,
+    /(?:(?:external|independent) accessibility audit|externally audited)/i,
+    /(?:current(?:ly)? (?:green|passing) CI|CI (?:is )?(?:currently )?(?:green|passing|passes))/i,
     /Cloudflare[^.]+(?:PDF|submission)/i,
-    /sole author/i,
-    /decorative review marks/i,
+    /sole (?:author|authorship|creator|developer)/i,
+    /\b(?:UMT|IMTC)\b/,
+    /(?:fabricated (?:reviewer|review|manuscript) material|decorative (?:review|reviewer) marks?|manuscript[- ]rating material)/i,
+    /myconference\.my/i,
     privateSourcePattern,
   ];
 
