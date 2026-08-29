@@ -1,0 +1,19 @@
+{
+  "name": "lehaziq.github.io",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "audit": "node scripts/audit-disclosure.mjs",
+    "build": "astro build",
+    "check": "astro check",
+    "dev": "astro dev",
+    "test": "npm run build && npm run test:foundation && npm run audit",
+    "test:foundation": "node --test tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "astro": "7.2.9",
+    "typescript": "6.0.3"
+  }
+}

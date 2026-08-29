@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f4ef;
+  color: #171717;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+}
+
+a {
+  color: #093fb4;
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 0.1875rem solid #b42318;
+  outline-offset: 0.1875rem;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 1.25rem;
+}
+
+.site-header nav,
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+}
+
+.site-header nav a,
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+.site-name {
+  color: inherit;
+  font-weight: 700;
+}
+
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: clamp(4rem, 14vw, 10rem) 1.25rem;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  color: #4c4c4c;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  max-width: 16ch;
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 6rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.introduction,
+.missing-page > p:not(.eyebrow) {
+  max-width: 46rem;
+  margin: 2rem 0;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  line-height: 1.4;
+}
+
+.primary-action {
+  padding: 0 1rem;
+  background: #093fb4;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 34rem) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

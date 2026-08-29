@@ -1,0 +1,31 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const title = "Muhammad Haziq Aiman Anuar | Software Engineer";
+const description =
+  "Software engineer building secure web systems, with research experience in AI and computer vision. Explore MyConference and academic projects.";
+const resumePath = "/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
+---
+
+<BaseLayout title={title} description={description}>
+  <header class="site-header">
+    <a class="site-name" href="/">Muhammad Haziq Aiman Anuar</a>
+    <nav aria-label="Primary">
+      <a href="mailto:haziqaimanfb@gmail.com">Contact</a>
+      <a href={resumePath} download>Resume</a>
+    </nav>
+  </header>
+
+  <main>
+    <p class="eyebrow">Software engineer · Kuala Terengganu, Malaysia</p>
+    <h1>Muhammad Haziq Aiman Anuar</h1>
+    <p class="introduction">
+      I build secure, production-oriented web systems, with applied AI and computer
+      vision as a second field of work.
+    </p>
+    <div class="actions">
+      <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Contact me</a>
+      <a href={resumePath} download>Download resume</a>
+    </div>
+  </main>
+</BaseLayout>

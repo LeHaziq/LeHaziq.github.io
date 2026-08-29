@@ -1,0 +1,20 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const resumePath = "/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
+---
+
+<BaseLayout
+  title="Page not found | Muhammad Haziq Aiman Anuar"
+  description="The requested Portfolio page could not be found."
+>
+  <main class="missing-page">
+    <p class="eyebrow">404</p>
+    <h1>Page not found</h1>
+    <p>The address may be incorrect, or the page may have moved.</p>
+    <div class="actions">
+      <a class="primary-action" href="/">Return to the Portfolio</a>
+      <a href={resumePath} download>Download resume</a>
+    </div>
+  </main>
+</BaseLayout>
