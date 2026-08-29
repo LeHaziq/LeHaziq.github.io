@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm, writeFile } from "node:fs/promises";
+import { promisify } from "node:util";
 import test from "node:test";
+
+const execFileAsync = promisify(execFile);
+const repositoryRoot = new URL("../", import.meta.url);
 
 const resumePath = new URL(
   "../public/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf",
@@ -67,4 +72,24 @@ test("the Pages workflow publishes main without cancelling active deployments", 
   assert.match(workflow, /needs: build/);
   assert.match(workflow, /name: github-pages/);
   assert.match(workflow, /uses: actions\/deploy-pages@v5/);
+});
+
+test("the disclosure audit rejects dotenv files", async () => {
+  const fixture = new URL("../.env.audit-fixture", import.meta.url);
+  const variableName = ["PORTFOLIO", "TOKEN"].join("_");
+  await writeFile(fixture, `${variableName}=not-a-real-secret\n`);
+
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, ["scripts/audit-disclosure.mjs"], {
+        cwd: repositoryRoot,
+      }),
+      (error) => {
+        assert.match(error.stderr, /blocked sensitive path/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(fixture, { force: true });
+  }
 });

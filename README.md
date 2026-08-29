@@ -24,5 +24,5 @@ and scans the repository and generated files for disclosure risks.
 
 ## Indexing
 
-Builds block search indexing by default. Set `SITE_INDEXING=enabled` only for an
-approved production-domain release.
+Builds block search indexing during validation. Production indexing remains a
+separate release step after the custom domain is ready.

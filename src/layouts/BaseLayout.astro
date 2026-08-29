@@ -7,8 +7,6 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
-const indexingEnabled = import.meta.env.SITE_INDEXING === "enabled";
-const robots = indexingEnabled ? "index,follow" : "noindex,nofollow";
 ---
 
 <!doctype html>
@@ -17,7 +15,7 @@ const robots = indexingEnabled ? "index,follow" : "noindex,nofollow";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <meta name="robots" content={robots} />
+    <meta name="robots" content="noindex,nofollow" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
     <title>{title}</title>
   </head>
