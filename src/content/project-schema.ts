@@ -103,7 +103,6 @@ export const evidenceSchema = z
     provenance: requiredText("Evidence provenance"),
     attribution: requiredText("Evidence attribution"),
     publicationApproved: z.boolean(),
-    qualifierRequired: z.boolean(),
     qualifier: z.string().trim().optional(),
     publicLink: publicUrl.optional(),
     assetReference: stableId.optional(),
@@ -119,11 +118,16 @@ export const evidenceSchema = z
       });
     }
 
-    if (evidence.qualifierRequired && !evidence.qualifier) {
+    if (
+      ["repository", "runtime-capture", "measurement", "public-page"].includes(
+        evidence.evidenceType,
+      ) &&
+      !evidence.qualifier
+    ) {
       context.addIssue({
         code: "custom",
         path: ["qualifier"],
-        message: "This public claim requires a date or snapshot qualifier",
+        message: `${evidence.evidenceType} evidence requires a date or snapshot qualifier`,
       });
     }
   });
@@ -131,16 +135,14 @@ export const evidenceSchema = z
 const narrativeBlockSchema = z.object({
   type: z.literal("narrative"),
   heading: requiredText("Narrative heading"),
-  body: requiredText("Narrative body"),
   evidenceReferences,
-});
+}).strict();
 
 const workflowBlockSchema = z.object({
   type: z.literal("workflow"),
   heading: requiredText("Workflow heading"),
-  steps: z.array(requiredText("Workflow step")).min(1),
-  evidenceReferences,
-});
+  stepEvidenceReferences: evidenceReferences,
+}).strict();
 
 const engineeringDecisionBlockSchema = z.object({
   type: z.literal("engineering-decision"),
@@ -184,7 +186,7 @@ export const featuredBlockSchema = z.discriminatedUnion("type", [
 });
 
 const commonProjectFields = {
-  slug: stableId,
+  projectSlug: stableId,
   title: requiredText("Project title"),
   contextLabel: requiredText("Context label"),
   timeframe: requiredText("Timeframe"),
@@ -236,11 +238,33 @@ function referencedEvidence(project: Project): string[] {
     return project.academic.evidenceReferences;
   }
 
-  return project.blocks.flatMap((block) =>
-    block.type === "metric"
-      ? [block.evidenceReference]
-      : block.evidenceReferences,
-  );
+  return project.blocks.flatMap((block) => {
+    if (block.type === "metric") {
+      return [block.evidenceReference];
+    }
+    if (block.type === "workflow") {
+      return block.stepEvidenceReferences;
+    }
+    return block.evidenceReferences;
+  });
+}
+
+function assertEvidenceReference(
+  project: Project,
+  evidenceById: Map<string, Project["evidence"][number]>,
+  evidenceId: string,
+  owner: string,
+): void {
+  const evidence = evidenceById.get(evidenceId);
+  if (!evidence) {
+    throw new Error(`${owner} references missing evidence "${evidenceId}"`);
+  }
+  if (
+    project.publicationStatus === "published" &&
+    evidence.publicationStatus !== "published"
+  ) {
+    throw new Error(`${owner} references draft evidence "${evidenceId}"`);
+  }
 }
 
 export function selectPublishedProjects(
@@ -249,13 +273,13 @@ export function selectPublishedProjects(
   const slugOwners = new Map<string, string>();
 
   for (const entry of entries) {
-    const existingOwner = slugOwners.get(entry.data.slug);
+    const existingOwner = slugOwners.get(entry.data.projectSlug);
     if (existingOwner) {
       throw new Error(
-        `Duplicate project slug "${entry.data.slug}" in ${existingOwner} and ${entry.id}`,
+        `Duplicate project slug "${entry.data.projectSlug}" in ${existingOwner} and ${entry.id}`,
       );
     }
-    slugOwners.set(entry.data.slug, entry.id);
+    slugOwners.set(entry.data.projectSlug, entry.id);
 
     const evidenceById = new Map(
       entry.data.evidence.map((evidence) => [evidence.id, evidence]),
@@ -263,45 +287,29 @@ export function selectPublishedProjects(
     const assetIds = new Set(entry.data.assets.map((asset) => asset.id));
 
     for (const evidenceId of referencedEvidence(entry.data)) {
-      const evidence = evidenceById.get(evidenceId);
-      if (!evidence) {
-        throw new Error(
-          `Project "${entry.data.slug}" references missing evidence "${evidenceId}"`,
-        );
-      }
-      if (
-        entry.data.publicationStatus === "published" &&
-        evidence.publicationStatus !== "published"
-      ) {
-        throw new Error(
-          `Project "${entry.data.slug}" references draft evidence "${evidenceId}"`,
-        );
-      }
+      assertEvidenceReference(
+        entry.data,
+        evidenceById,
+        evidenceId,
+        `Project "${entry.data.projectSlug}"`,
+      );
     }
 
     for (const asset of entry.data.assets) {
       for (const evidenceId of asset.evidenceReferences) {
-        const evidence = evidenceById.get(evidenceId);
-        if (!evidence) {
-          throw new Error(
-            `Project "${entry.data.slug}" asset "${asset.id}" references missing evidence "${evidenceId}"`,
-          );
-        }
-        if (
-          entry.data.publicationStatus === "published" &&
-          evidence.publicationStatus !== "published"
-        ) {
-          throw new Error(
-            `Project "${entry.data.slug}" asset "${asset.id}" references draft evidence "${evidenceId}"`,
-          );
-        }
+        assertEvidenceReference(
+          entry.data,
+          evidenceById,
+          evidenceId,
+          `Project "${entry.data.projectSlug}" asset "${asset.id}"`,
+        );
       }
     }
 
     for (const evidence of entry.data.evidence) {
       if (evidence.assetReference && !assetIds.has(evidence.assetReference)) {
         throw new Error(
-          `Evidence "${evidence.id}" references missing asset "${evidence.assetReference}"`,
+          `Project "${entry.data.projectSlug}" evidence "${evidence.id}" references missing asset "${evidence.assetReference}"`,
         );
       }
     }
@@ -310,7 +318,7 @@ export function selectPublishedProjects(
       for (const block of entry.data.blocks) {
         if (block.type === "media" && !assetIds.has(block.assetReference)) {
           throw new Error(
-            `Project "${entry.data.slug}" references missing asset "${block.assetReference}"`,
+            `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,
           );
         }
       }

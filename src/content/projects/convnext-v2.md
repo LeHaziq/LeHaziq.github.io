@@ -1,5 +1,5 @@
 ---
-slug: convnext-v2-facial-action-unit-detection
+projectSlug: convnext-v2-facial-action-unit-detection
 title: Facial Action Unit Detection using ConvNeXt V2
 projectType: academic
 contextLabel: Computer Vision Research Project · UiTM · 2026
@@ -22,15 +22,13 @@ evidence:
     provenance: Muhammad Haziq Aiman Anuar's approved Downloadable resume
     attribution: Muhammad Haziq Aiman Anuar
     publicationApproved: true
-    qualifierRequired: false
   - id: held-out-means
     publicationStatus: published
     publicClaim: "Reported held-out means: 35.1% mean AU-F1 and 46.8% mean micro-F1."
-    evidenceType: resume
+    evidenceType: measurement
     provenance: Muhammad Haziq Aiman Anuar's approved Downloadable resume
     attribution: Muhammad Haziq Aiman Anuar
     publicationApproved: true
-    qualifierRequired: true
     qualifier: Subject-disjoint three-fold cross-validation on DISFA
 assets: []
 academic:

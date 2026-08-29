@@ -6,16 +6,22 @@ import { promisify } from "node:util";
 import test from "node:test";
 
 import {
+  featuredBlockSchema,
   projectSchema,
   selectPublishedProjects,
 } from "../src/content/project-schema.ts";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = new URL("../", import.meta.url);
+const generatedRootPage = new URL("../dist/index.html", import.meta.url);
+const projectFixturePath = new URL(
+  "../src/content/projects/test-fixture.md",
+  import.meta.url,
+);
 
 function academicProject(overrides = {}) {
   return {
-    slug: "fixture-project",
+    projectSlug: "fixture-project",
     title: "Fixture project",
     projectType: "academic",
     contextLabel: "Academic project · UiTM · 2026",
@@ -36,7 +42,6 @@ function academicProject(overrides = {}) {
         provenance: "Approved fixture",
         attribution: "Muhammad Haziq Aiman Anuar",
         publicationApproved: true,
-        qualifierRequired: false,
       },
     ],
     assets: [],
@@ -53,6 +58,27 @@ function academicProject(overrides = {}) {
 function validationMessages(result) {
   assert.equal(result.success, false);
   return result.error.issues.map((issue) => issue.message).join("\n");
+}
+
+function markdownRecord(project) {
+  return `---\n${JSON.stringify(project, null, 2)}\n---\n\nTest fixture.\n`;
+}
+
+async function build() {
+  return execFileAsync("npm", ["run", "build"], { cwd: repositoryRoot });
+}
+
+async function expectBuildFailure(project, expectedMessage) {
+  await writeFile(projectFixturePath, markdownRecord(project));
+
+  try {
+    await assert.rejects(build(), (error) => {
+      assert.match(`${error.stdout}\n${error.stderr}`, expectedMessage);
+      return true;
+    });
+  } finally {
+    await rm(projectFixturePath, { force: true });
+  }
 }
 
 test("the Portfolio publishes the ConvNeXt V2 Academic project", async () => {
@@ -72,6 +98,10 @@ test("the Portfolio publishes the ConvNeXt V2 Academic project", async () => {
   assert.match(rootPage, /mean AU-F1/);
   assert.match(rootPage, /46\.8%/);
   assert.match(rootPage, /mean micro-F1/);
+  assert.doesNotMatch(
+    rootPage,
+    /PyTorch|commercial deployment|public paper|repository|model card|demo|diagram|screenshot/i,
+  );
 });
 
 test("the project schema rejects missing required fields", () => {
@@ -112,14 +142,12 @@ test("the schema represents every approved Featured project block", () => {
       {
         type: "narrative",
         heading: "Ownership and problem",
-        body: "A sourced narrative.",
         evidenceReferences: ["fixture-evidence"],
       },
       {
         type: "workflow",
         heading: "Review workflow",
-        steps: ["Submission", "Review", "Decision"],
-        evidenceReferences: ["fixture-evidence"],
+        stepEvidenceReferences: ["fixture-evidence"],
       },
       {
         type: "engineering-decision",
@@ -152,6 +180,17 @@ test("the schema represents every approved Featured project block", () => {
   delete project.academic;
 
   assert.equal(projectSchema.safeParse(project).success, true);
+});
+
+test("Featured narrative blocks keep public claims in evidence records", () => {
+  const result = featuredBlockSchema.safeParse({
+    type: "narrative",
+    heading: "Ownership and problem",
+    body: "A duplicated public claim.",
+    evidenceReferences: ["fixture-evidence"],
+  });
+
+  assert.match(validationMessages(result), /Unrecognized key.*body/);
 });
 
 test("the project schema rejects unknown Featured project blocks", () => {
@@ -206,11 +245,11 @@ test("the project schema rejects invalid or unapproved links", () => {
 
 test("the project schema rejects claims missing required qualifiers", () => {
   const project = academicProject();
-  project.evidence[0].qualifierRequired = true;
+  project.evidence[0].evidenceType = "measurement";
 
   const messages = validationMessages(projectSchema.safeParse(project));
 
-  assert.match(messages, /requires a date or snapshot qualifier/);
+  assert.match(messages, /measurement evidence requires a date or snapshot qualifier/);
 });
 
 test("the project schema rejects unapproved assets", () => {
@@ -307,14 +346,13 @@ test("project publication excludes draft projects and evidence", () => {
           provenance: "Unapproved fixture",
           attribution: "Muhammad Haziq Aiman Anuar",
           publicationApproved: false,
-          qualifierRequired: false,
         },
       ],
     }),
   );
   const draft = projectSchema.parse(
     academicProject({
-      slug: "draft-project",
+    projectSlug: "draft-project",
       publicationStatus: "draft",
     }),
   );
@@ -324,7 +362,7 @@ test("project publication excludes draft projects and evidence", () => {
     { id: "draft.md", data: draft },
   ]);
 
-  assert.deepEqual(result.map((project) => project.slug), ["fixture-project"]);
+  assert.deepEqual(result.map((project) => project.projectSlug), ["fixture-project"]);
   assert.deepEqual(
     result[0].evidence.map((evidence) => evidence.id),
     ["fixture-evidence"],
@@ -334,7 +372,7 @@ test("project publication excludes draft projects and evidence", () => {
 test("a draft project may reference its draft evidence without publishing", () => {
   const project = projectSchema.parse(
     academicProject({
-      slug: "draft-project",
+      projectSlug: "draft-project",
       publicationStatus: "draft",
       evidence: [
         {
@@ -345,7 +383,6 @@ test("a draft project may reference its draft evidence without publishing", () =
           provenance: "Unapproved fixture",
           attribution: "Muhammad Haziq Aiman Anuar",
           publicationApproved: false,
-          qualifierRequired: false,
         },
       ],
       academic: {
@@ -363,6 +400,151 @@ test("a draft project may reference its draft evidence without publishing", () =
   );
 });
 
+test("Astro excludes draft projects and draft evidence from generated output", async () => {
+  const draftClaim = "Unpublished evidence must stay out of generated output.";
+  const project = academicProject({
+    projectSlug: "draft-build-fixture",
+    title: "Unpublished Academic project",
+    publicationStatus: "draft",
+    evidence: [
+      {
+        id: "draft-evidence",
+        publicationStatus: "draft",
+        publicClaim: draftClaim,
+        evidenceType: "resume",
+        provenance: "Unapproved fixture",
+        attribution: "Muhammad Haziq Aiman Anuar",
+        publicationApproved: false,
+      },
+    ],
+    academic: {
+      problem: "A draft fixture problem.",
+      approach: "A draft fixture approach.",
+      outcome: "A draft fixture outcome.",
+      evidenceReferences: ["draft-evidence"],
+    },
+  });
+  await writeFile(projectFixturePath, markdownRecord(project));
+
+  try {
+    await build();
+    const output = await readFile(generatedRootPage, "utf8");
+    assert.doesNotMatch(output, /Unpublished Academic project/);
+    assert.doesNotMatch(output, new RegExp(draftClaim));
+  } finally {
+    await rm(projectFixturePath, { force: true });
+  }
+});
+
+test("Astro rejects invalid project records with useful errors", async (context) => {
+  await context.test("duplicate slugs", async () => {
+    await expectBuildFailure(
+      academicProject({
+        projectSlug: "convnext-v2-facial-action-unit-detection",
+      }),
+      /Duplicate project slug "convnext-v2-facial-action-unit-detection"/,
+    );
+  });
+
+  await context.test("missing required fields", async () => {
+    const project = academicProject();
+    delete project.summary;
+    await expectBuildFailure(project, /summary.*Required/i);
+  });
+
+  await context.test("unknown Featured project blocks", async () => {
+    const project = {
+      ...academicProject(),
+      projectType: "featured",
+      blocks: [
+        {
+          type: "testimonial",
+          evidenceReferences: ["fixture-evidence"],
+        },
+      ],
+    };
+    delete project.academic;
+    await expectBuildFailure(project, /Unknown Featured project block type/);
+  });
+
+  await context.test("invalid links", async () => {
+    await expectBuildFailure(
+      academicProject({
+        links: [
+          {
+            label: "Source",
+            destination: "private-repository",
+            purpose: "source",
+            publicationApproved: true,
+          },
+        ],
+      }),
+      /Enter a valid absolute URL/,
+    );
+  });
+
+  await context.test("missing evidence references", async () => {
+    await expectBuildFailure(
+      academicProject({
+        academic: {
+          problem: "A fixture problem.",
+          approach: "A fixture approach.",
+          outcome: "A fixture outcome.",
+          evidenceReferences: ["missing-evidence"],
+        },
+      }),
+      /references missing evidence "missing-evidence"/,
+    );
+  });
+
+  await context.test("claims missing qualifiers", async () => {
+    const project = academicProject();
+    project.evidence[0].evidenceType = "measurement";
+    await expectBuildFailure(
+      project,
+      /measurement evidence requires a date or snapshot qualifier/,
+    );
+  });
+
+  await context.test("unapproved links", async () => {
+    await expectBuildFailure(
+      academicProject({
+        links: [
+          {
+            label: "Source",
+            destination: "https://example.com/source",
+            purpose: "source",
+            publicationApproved: false,
+          },
+        ],
+      }),
+      /Project links require publication approval/,
+    );
+  });
+
+  await context.test("unapproved assets", async () => {
+    await expectBuildFailure(
+      academicProject({
+        assets: [
+          {
+            id: "fixture-image",
+            path: "src/assets/projects/fixture.png",
+            kind: "image",
+            ownerOrProvenance: "Approved fixture",
+            publicationApproved: false,
+            caption: "Fixture image.",
+            alternativeText: "A fixture image.",
+            evidenceReferences: ["fixture-evidence"],
+            fictionalDataCheck: "not-applicable",
+            decorative: false,
+          },
+        ],
+      }),
+      /Project assets require publication approval/,
+    );
+  });
+});
+
 test("a routine project addition needs only one Markdown record", async () => {
   const fixture = new URL(
     "../src/content/projects/disposable-project.md",
@@ -373,7 +555,7 @@ test("a routine project addition needs only one Markdown record", async () => {
   await writeFile(
     fixture,
     `---
-slug: disposable-valid-project
+projectSlug: disposable-valid-project
 title: ${marker}
 projectType: academic
 contextLabel: Academic project · UiTM · 2026
@@ -394,7 +576,6 @@ evidence:
     provenance: Approved test fixture
     attribution: Muhammad Haziq Aiman Anuar
     publicationApproved: true
-    qualifierRequired: false
 assets: []
 academic:
   problem: A temporary authoring problem.
@@ -409,7 +590,7 @@ This file is removed before the test finishes.
   );
 
   try {
-    await execFileAsync("npm", ["run", "build"], { cwd: repositoryRoot });
+    await build();
     const withFixture = await readFile(
       new URL("../dist/index.html", import.meta.url),
       "utf8",
@@ -419,7 +600,7 @@ This file is removed before the test finishes.
     await rm(fixture, { force: true });
   }
 
-  await execFileAsync("npm", ["run", "build"], { cwd: repositoryRoot });
+  await build();
   const withoutFixture = await readFile(
     new URL("../dist/index.html", import.meta.url),
     "utf8",
