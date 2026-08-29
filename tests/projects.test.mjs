@@ -81,13 +81,22 @@ async function expectBuildFailure(project, expectedMessage) {
   }
 }
 
-test("the Portfolio publishes the ConvNeXt V2 Academic project", async () => {
+test("the Portfolio publishes the Academic projects in the approved order", async () => {
   const rootPage = await readFile(
     new URL("../dist/index.html", import.meta.url),
     "utf8",
   );
 
+  const convnextIndex = rootPage.indexOf(
+    "Facial Action Unit Detection using ConvNeXt V2",
+  );
+  const attendanceIndex = rootPage.indexOf(
+    "AI-Driven Automated Attendance Tracking System",
+  );
+
   assert.match(rootPage, /Academic projects/);
+  assert.ok(convnextIndex > -1);
+  assert.ok(attendanceIndex > convnextIndex);
   assert.match(rootPage, /Computer Vision Research Project · UiTM · 2026/);
   assert.match(
     rootPage,
@@ -98,6 +107,33 @@ test("the Portfolio publishes the ConvNeXt V2 Academic project", async () => {
   assert.match(rootPage, /mean AU-F1/);
   assert.match(rootPage, /46\.8%/);
   assert.match(rootPage, /mean micro-F1/);
+  assert.match(rootPage, /Final Year Project · UiTM · 2024/);
+  assert.match(
+    rootPage,
+    /A Python desktop system for real-time face detection and recognition, schedules, enrolment records, attendance logs, and attendance queries\./,
+  );
+
+  const attendanceEntry = rootPage.slice(
+    attendanceIndex,
+    rootPage.indexOf("</article>", attendanceIndex),
+  );
+  const technologies = [
+    ...attendanceEntry.matchAll(/<li>([^<]+)<\/li>/g),
+  ].map((match) => match[1]);
+
+  assert.deepEqual(technologies, [
+    "Python",
+    "OpenCV",
+    "Tkinter",
+    "YOLOv8n",
+    "FaceNet",
+    "MySQL",
+  ]);
+  assert.equal(
+    [...rootPage.matchAll(/<p class="project-type">Academic project<\/p>/g)]
+      .length,
+    2,
+  );
   assert.doesNotMatch(
     rootPage,
     /PyTorch|commercial deployment|public paper|repository|model card|demo|diagram|screenshot/i,

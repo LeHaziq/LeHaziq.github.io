@@ -11,6 +11,47 @@ const projects = selectPublishedProjects(await getCollection("projects"));
 const academicProjects = projects.filter(
   (project) => project.projectType === "academic",
 );
+const experienceEntries = [
+  {
+    role: "Research Assistant",
+    organization: "Universiti Teknologi MARA (UiTM)",
+    dates: "Nov 2024 – Mar 2026",
+    location: "Shah Alam, Selangor",
+    description:
+      "Machine learning, deep learning, and computer-vision research; CNN and transformer testing; research and technical writing.",
+  },
+  {
+    role: "Software Engineer (On-the-Job Trainee)",
+    organization: "TalentLabs / Mysoftcare",
+    dates: "Jul 2024 – Nov 2024",
+    location: "Kuala Terengganu, Terengganu",
+    description:
+      "Laravel application development and maintenance; feature work, interface updates, and issue diagnosis.",
+  },
+  {
+    role: "System Engineer Intern",
+    organization: "Kesatuan Kakitangan Akademik UiTM (MITASA)",
+    dates: "Mar 2024 – Jun 2024",
+    location: "Shah Alam, Selangor",
+    description:
+      "Django and MySQL claim-management system using Python, Django, HTML, CSS, JavaScript, and Bootstrap, including testing, debugging, and deployment.",
+  },
+];
+const educationEntries = [
+  {
+    qualification: "Master of Science in Computer Science",
+    institution: "Universiti Teknologi MARA (UiTM)",
+    dates: "2024 – Present",
+    location: "Shah Alam, Selangor",
+  },
+  {
+    qualification:
+      "BSc (Hons.) Information Systems — Intelligent Systems Engineering",
+    institution: "Universiti Teknologi MARA (UiTM)",
+    dates: "2022 – 2024",
+    location: "Shah Alam, Selangor",
+  },
+];
 ---
 
 <BaseLayout title={title} description={description}>
@@ -46,6 +87,7 @@ const academicProjects = projects.filter(
         <div class="academic-project-list">
           {academicProjects.map((project) => (
             <article class="academic-project">
+              <p class="project-type">Academic project</p>
               <h3>{project.title}</h3>
               <p class="project-context">{project.contextLabel}</p>
               <dl class="academic-project-details">
@@ -62,10 +104,59 @@ const academicProjects = projects.filter(
                   <dd>{project.academic.outcome}</dd>
                 </div>
               </dl>
+              <ul class="project-technologies" aria-label="Technologies">
+                {project.technologies.map((technology) => <li>{technology}</li>)}
+              </ul>
             </article>
           ))}
         </div>
       </section>
     )}
+
+    <section class="chronology" aria-labelledby="experience-education-heading">
+      <header class="section-heading">
+        <h2 id="experience-education-heading">Experience &amp; education</h2>
+        <p>Selected roles and study following the project evidence.</p>
+      </header>
+
+      <div class="chronology-groups">
+        <section class="chronology-group" aria-labelledby="experience-heading">
+          <h3 id="experience-heading">Experience</h3>
+          <ol class="chronology-list">
+            {experienceEntries.map((entry) => (
+              <li>
+                <article>
+                  <h4>{entry.role}</h4>
+                  <p class="chronology-organization">{entry.organization}</p>
+                  <p class="chronology-meta">
+                    <span>{entry.dates}</span>
+                    <span>{entry.location}</span>
+                  </p>
+                  <p class="chronology-description">{entry.description}</p>
+                </article>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section class="chronology-group" aria-labelledby="education-heading">
+          <h3 id="education-heading">Education</h3>
+          <ol class="chronology-list">
+            {educationEntries.map((entry) => (
+              <li>
+                <article>
+                  <h4>{entry.qualification}</h4>
+                  <p class="chronology-organization">{entry.institution}</p>
+                  <p class="chronology-meta">
+                    <span>{entry.dates}</span>
+                    <span>{entry.location}</span>
+                  </p>
+                </article>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </div>
+    </section>
   </main>
 </BaseLayout>

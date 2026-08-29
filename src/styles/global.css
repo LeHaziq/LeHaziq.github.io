@@ -105,6 +105,15 @@ h1 {
   border-top: 0.125rem solid #171717;
 }
 
+.chronology {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  margin-top: clamp(1rem, 4vw, 3rem);
+  padding-top: clamp(3rem, 7vw, 5rem);
+  border-top: 0.125rem solid #171717;
+}
+
 .section-heading h2 {
   max-width: 8ch;
   margin: 0;
@@ -134,6 +143,15 @@ h1 {
   font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+}
+
+.project-type {
+  margin: 0 0 0.75rem;
+  color: #4c4c4c;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .academic-project h3 {
@@ -178,6 +196,82 @@ h1 {
   line-height: 1.45;
 }
 
+.project-technologies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  color: #4c4c4c;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  list-style: none;
+}
+
+.project-technologies li:not(:last-child)::after {
+  margin-inline-start: 0.75rem;
+  content: "·";
+}
+
+.chronology-groups {
+  min-width: 0;
+}
+
+.chronology-group + .chronology-group {
+  margin-top: clamp(3rem, 7vw, 5rem);
+}
+
+.chronology-group > h3 {
+  margin: 0 0 1rem;
+  color: #093fb4;
+  font-size: 0.875rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chronology-list {
+  margin: 0;
+  padding: 0;
+  border-top: 0.0625rem solid #bbb9b0;
+  list-style: none;
+}
+
+.chronology-list > li {
+  padding: 1.5rem 0;
+  border-bottom: 0.0625rem solid #bbb9b0;
+}
+
+.chronology-list h4 {
+  max-width: 34ch;
+  margin: 0;
+  overflow-wrap: break-word;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.chronology-organization {
+  margin: 0.625rem 0 0;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.chronology-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  margin: 0.5rem 0 0;
+  color: #4c4c4c;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.chronology-description {
+  max-width: 44rem;
+  margin: 1rem 0 0;
+  line-height: 1.65;
+}
+
 @media (max-width: 34rem) {
   .site-header {
     align-items: flex-start;
@@ -185,6 +279,10 @@ h1 {
   }
 
   .academic-projects {
+    grid-template-columns: 1fr;
+  }
+
+  .chronology {
     grid-template-columns: 1fr;
   }
 
