@@ -81,6 +81,131 @@ async function expectBuildFailure(project, expectedMessage) {
   }
 }
 
+test("the Portfolio publishes the first MyConference evidence pass", async () => {
+  const rootPage = await readFile(generatedRootPage, "utf8");
+  const introductionIndex = rootPage.indexOf("introduction-section");
+  const featuredIndex = rootPage.indexOf('id="myconference"');
+  const academicIndex = rootPage.indexOf('class="academic-projects"');
+  const featuredEnd = rootPage.indexOf("</section>", featuredIndex);
+  const featuredPass = rootPage.slice(featuredIndex, featuredEnd);
+
+  assert.ok(featuredIndex > introductionIndex);
+  assert.ok(academicIndex > featuredIndex);
+  assert.match(
+    featuredPass,
+    /<h2[^>]*>MyConference: ownership and problem<\/h2>/,
+  );
+  assert.match(
+    featuredPass,
+    /MyConference is an ongoing, multi-tenant conference peer-review application\. It covers the path from a call for papers and submission through reviewer assignment, review, decision, revision, and camera-ready upload\./,
+  );
+  assert.match(
+    featuredPass,
+    /I inherited an earlier prototype and led the current Laravel-based MyConference rebuild\. I made the final product and engineering decisions while using AI-assisted development tools\./,
+  );
+  assert.match(featuredPass, /Portfolio(?:'|&#39;)s deepest evidence/);
+  assert.match(featuredPass, /Organisations/);
+  assert.match(featuredPass, /Conference-scoped roles/);
+  assert.match(featuredPass, /confidential material/);
+  assert.match(featuredPass, /deadlines/);
+  assert.match(featuredPass, /decisions/);
+  assert.match(featuredPass, /Laravel/);
+  assert.match(featuredPass, /PHP/);
+  assert.match(featuredPass, /PostgreSQL/);
+  assert.match(featuredPass, /Blade/);
+  assert.match(featuredPass, /Tailwind CSS/);
+  assert.match(featuredPass, /Alpine\.js/);
+  assert.match(featuredPass, /Vite/);
+  assert.match(featuredPass, /PHPUnit/);
+  assert.match(featuredPass, /Node tests/);
+  assert.match(featuredPass, /Playwright/);
+  assert.match(featuredPass, /self-assessed WCAG 2\.2 AA baseline/);
+  assert.match(featuredPass, /Authorized pilot/);
+  assert.doesNotMatch(featuredPass, /myconference\.my|UMT|IMTC/);
+  for (const evidenceId of [
+    "application-scope",
+    "ownership-boundary",
+    "peer-review-problem",
+    "verified-stack",
+    "accessibility-and-pilot",
+  ]) {
+    assert.match(
+      featuredPass,
+      new RegExp(`id="myconference-evidence-${evidenceId}"`),
+    );
+  }
+});
+
+test("the project schema rejects prohibited MyConference publication claims", () => {
+  const prohibitedClaims = [
+    "MyConference is a public demo.",
+    "MyConference serves a production customer.",
+    "MyConference has broad adoption.",
+    "Register for MyConference today.",
+    "The public repository proves the implementation.",
+    "MyConference passed an external accessibility audit.",
+    "MyConference has current green CI.",
+    "Cloudflare cannot access submission PDFs.",
+    "I am the sole author of MyConference.",
+    "The Authorized pilot is operated with UMT for IMTC.",
+  ];
+
+  for (const publicClaim of prohibitedClaims) {
+    const project = {
+      ...academicProject(),
+      projectSlug: "myconference",
+      projectType: "featured",
+      evidence: [
+        {
+          ...academicProject().evidence[0],
+          publicClaim,
+        },
+      ],
+      blocks: [
+        {
+          type: "narrative",
+          heading: "Ownership and problem",
+          evidenceReferences: ["fixture-evidence"],
+        },
+      ],
+    };
+    delete project.academic;
+
+    assert.match(
+      validationMessages(projectSchema.safeParse(project)),
+      /Prohibited MyConference publication claim/,
+      publicClaim,
+    );
+  }
+
+  const projectWithPilotLink = {
+    ...academicProject(),
+    projectSlug: "myconference",
+    projectType: "featured",
+    links: [
+      {
+        label: "Pilot",
+        destination: "https://myconference.my/",
+        purpose: "Authorized pilot",
+        publicationApproved: true,
+      },
+    ],
+    blocks: [
+      {
+        type: "narrative",
+        heading: "Ownership and problem",
+        evidenceReferences: ["fixture-evidence"],
+      },
+    ],
+  };
+  delete projectWithPilotLink.academic;
+
+  assert.match(
+    validationMessages(projectSchema.safeParse(projectWithPilotLink)),
+    /MyConference pilot link requires recorded promotion approval/,
+  );
+});
+
 test("the Portfolio publishes the Academic projects in the approved order", async () => {
   const rootPage = await readFile(
     new URL("../dist/index.html", import.meta.url),

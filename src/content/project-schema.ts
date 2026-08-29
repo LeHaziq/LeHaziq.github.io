@@ -218,10 +218,58 @@ const featuredProjectSchema = z.object({
   blocks: z.array(featuredBlockSchema).min(1),
 });
 
-export const projectSchema = z.discriminatedUnion("projectType", [
-  featuredProjectSchema,
-  academicProjectSchema,
-]);
+const myConferenceProhibitedClaimPatterns = [
+  /\bpublic demo\b/i,
+  /\bproduction customer\b/i,
+  /\bbroad adoption\b/i,
+  /\b(?:register|sign up|create an account)\b/i,
+  /\b(?:public|open-source) (?:repository|repo|source code)\b/i,
+  /\b(?:external|independent) accessibility audit\b/i,
+  /\bcurrent green CI\b/i,
+  /\bCloudflare\b[\s\S]{0,100}\b(?:cannot|can't|does not|doesn't|never)\b[\s\S]{0,60}\b(?:access|read|see)\b[\s\S]{0,40}\b(?:PDFs?|submissions?)\b/i,
+  /\bsole (?:author|authorship|creator|developer)\b/i,
+  /\b(?:UMT|IMTC)\b/,
+];
+
+export const projectSchema = z
+  .discriminatedUnion("projectType", [
+    featuredProjectSchema,
+    academicProjectSchema,
+  ])
+  .superRefine((project, context) => {
+    if (
+      project.projectSlug !== "myconference" ||
+      project.publicationStatus !== "published"
+    ) {
+      return;
+    }
+
+    const publicationText = JSON.stringify(project);
+    if (
+      myConferenceProhibitedClaimPatterns.some((pattern) =>
+        pattern.test(publicationText),
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Prohibited MyConference publication claim",
+      });
+    }
+
+    if (
+      project.links.some((link) => {
+        const hostname = new URL(link.destination).hostname.toLowerCase();
+        return hostname === "myconference.my" || hostname === "www.myconference.my";
+      })
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["links"],
+        message:
+          "MyConference pilot link requires recorded promotion approval",
+      });
+    }
+  });
 
 export type Project = z.infer<typeof projectSchema>;
 export type PublishedProject = Project & {

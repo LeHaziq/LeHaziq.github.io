@@ -97,6 +97,83 @@ h1 {
   text-decoration: none;
 }
 
+.featured-project-pass,
+.academic-projects,
+.chronology {
+  margin-inline: calc(50% - 50vw);
+  padding-inline: max(1.25rem, calc((100vw - 72rem) / 2 + 1.25rem));
+}
+
+.featured-project-pass {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  background: #093fb4;
+  color: #fff;
+}
+
+.featured-pass-heading h2 {
+  max-width: 10ch;
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.featured-pass-heading > p {
+  max-width: 22rem;
+  margin: 1.25rem 0 0;
+  color: #dce6ff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.featured-evidence-list {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 0.125rem solid #fff;
+  list-style: none;
+}
+
+.featured-evidence-list > li {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.25fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem) 0;
+  border-bottom: 0.0625rem solid #7999df;
+}
+
+.verified-fact-label {
+  align-self: start;
+  width: max-content;
+  margin: 0;
+  padding: 0.3rem 0.45rem;
+  background: #b42318;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.featured-claim {
+  max-width: 46rem;
+  margin: 0;
+  font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  line-height: 1.55;
+}
+
+.featured-evidence-list > li:first-child .featured-claim,
+.featured-evidence-list > li:nth-child(2) .featured-claim {
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  line-height: 1.45;
+}
+
 .academic-projects,
 .chronology {
   display: grid;
@@ -274,9 +351,15 @@ h1 {
     flex-direction: column;
   }
 
+  .featured-project-pass,
   .academic-projects,
   .chronology {
     grid-template-columns: 1fr;
+  }
+
+  .featured-evidence-list > li {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
   }
 
   .section-heading h2 {
