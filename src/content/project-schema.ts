@@ -221,15 +221,84 @@ const featuredProjectSchema = z.object({
 const myConferenceProhibitedClaimPatterns = [
   /\bpublic demo\b/i,
   /\bproduction customer\b/i,
-  /\bbroad adoption\b/i,
+  /\b(?:broad adoption|broadly adopted)\b/i,
   /\b(?:register|sign up|create an account)\b/i,
   /\b(?:public|open-source) (?:repository|repo|source code)\b/i,
-  /\b(?:external|independent) accessibility audit\b/i,
-  /\bcurrent green CI\b/i,
+  /\b(?:source )?(?:repository|repo|source code) (?:is )?(?:public|open-source)\b/i,
+  /\b(?:(?:external|independent) accessibility audit|externally audited)\b/i,
+  /\b(?:current(?:ly)? (?:green|passing) CI|CI (?:is )?(?:currently )?(?:green|passing|passes))\b/i,
   /\bCloudflare\b[\s\S]{0,100}\b(?:cannot|can't|does not|doesn't|never)\b[\s\S]{0,60}\b(?:access|read|see)\b[\s\S]{0,40}\b(?:PDFs?|submissions?)\b/i,
   /\bsole (?:author|authorship|creator|developer)\b/i,
   /\b(?:UMT|IMTC)\b/,
+  /\b(?:fabricated (?:reviewer|review|manuscript) material|decorative (?:review|reviewer) marks?|manuscript[- ]rating material)\b/i,
+  new RegExp(
+    ["github\\.com", "LeHaziq", "Conference-Management-System"].join("\\/"),
+    "i",
+  ),
 ];
+
+function featuredBlockPublicationText(
+  block: z.infer<typeof featuredBlockSchema>,
+): string[] {
+  switch (block.type) {
+    case "narrative":
+    case "workflow":
+      return [block.heading];
+    case "engineering-decision":
+      return [block.situation, block.choice, block.rationale, block.result];
+    case "metric":
+      return [block.comparison, block.unit, block.qualifier];
+    case "media":
+      return [block.caption, block.alternativeText];
+    case "verified-fact":
+      return [];
+  }
+}
+
+function projectPublicationText(
+  project:
+    | z.infer<typeof featuredProjectSchema>
+    | z.infer<typeof academicProjectSchema>,
+): string {
+  const sharedText = [
+    project.title,
+    project.contextLabel,
+    project.timeframe,
+    project.summary,
+    project.role,
+    project.attributionBoundary,
+    ...project.technologies,
+    ...project.links.flatMap((link) => [
+      link.label,
+      link.destination,
+      link.purpose,
+    ]),
+    ...project.evidence.flatMap((evidence) => [
+      evidence.publicClaim,
+      evidence.publicLink ?? "",
+      evidence.publicCaption ?? "",
+      evidence.alternativeText ?? "",
+    ]),
+    ...project.assets.flatMap((asset) => [
+      asset.caption,
+      asset.alternativeText,
+    ]),
+  ];
+
+  if (project.projectType === "featured") {
+    return [
+      ...sharedText,
+      ...project.blocks.flatMap(featuredBlockPublicationText),
+    ].join("\n");
+  }
+
+  return [
+    ...sharedText,
+    project.academic.problem,
+    project.academic.approach,
+    project.academic.outcome,
+  ].join("\n");
+}
 
 export const projectSchema = z
   .discriminatedUnion("projectType", [
@@ -244,7 +313,7 @@ export const projectSchema = z
       return;
     }
 
-    const publicationText = JSON.stringify(project);
+    const publicationText = projectPublicationText(project);
     if (
       myConferenceProhibitedClaimPatterns.some((pattern) =>
         pattern.test(publicationText),

@@ -137,6 +137,11 @@ test("the Portfolio publishes the first MyConference evidence pass", async () =>
 });
 
 test("the project schema rejects prohibited MyConference publication claims", () => {
+  const privateSourceUrl = [
+    "https://github.com",
+    "LeHaziq",
+    "Conference-Management-System",
+  ].join("/");
   const prohibitedClaims = [
     "MyConference is a public demo.",
     "MyConference serves a production customer.",
@@ -145,9 +150,12 @@ test("the project schema rejects prohibited MyConference publication claims", ()
     "The public repository proves the implementation.",
     "MyConference passed an external accessibility audit.",
     "MyConference has current green CI.",
+    "MyConference CI currently passes.",
     "Cloudflare cannot access submission PDFs.",
     "I am the sole author of MyConference.",
     "The Authorized pilot is operated with UMT for IMTC.",
+    "Decorative review marks prove reviewer activity.",
+    `The source repository is ${privateSourceUrl}.`,
   ];
 
   for (const publicClaim of prohibitedClaims) {
@@ -204,6 +212,43 @@ test("the project schema rejects prohibited MyConference publication claims", ()
     validationMessages(projectSchema.safeParse(projectWithPilotLink)),
     /MyConference pilot link requires recorded promotion approval/,
   );
+
+  projectWithPilotLink.links[0] = {
+    label: "Source",
+    destination: privateSourceUrl,
+    purpose: "Public source proof",
+    publicationApproved: true,
+  };
+
+  assert.match(
+    validationMessages(projectSchema.safeParse(projectWithPilotLink)),
+    /Prohibited MyConference publication claim/,
+  );
+});
+
+test("the generated Portfolio omits prohibited MyConference claims", async () => {
+  const rootPage = await readFile(generatedRootPage, "utf8");
+  const privateSourcePattern = new RegExp(
+    ["github\\.com", "LeHaziq", "Conference-Management-System"].join("\\/"),
+    "i",
+  );
+  const prohibitedOutput = [
+    /public demo/i,
+    /production customer/i,
+    /broad adoption/i,
+    /register for MyConference/i,
+    /public source proof/i,
+    /external accessibility audit/i,
+    /current green CI/i,
+    /Cloudflare[^.]+(?:PDF|submission)/i,
+    /sole author/i,
+    /decorative review marks/i,
+    privateSourcePattern,
+  ];
+
+  for (const pattern of prohibitedOutput) {
+    assert.doesNotMatch(rootPage, pattern);
+  }
 });
 
 test("the Portfolio publishes the Academic projects in the approved order", async () => {
