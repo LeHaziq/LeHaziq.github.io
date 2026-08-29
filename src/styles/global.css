@@ -57,7 +57,11 @@ a:focus-visible {
 main {
   max-width: 72rem;
   margin: 0 auto;
-  padding: clamp(4rem, 14vw, 10rem) 1.25rem;
+  padding: clamp(4rem, 14vw, 10rem) 1.25rem 6rem;
+}
+
+.introduction-section {
+  padding-bottom: clamp(5rem, 12vw, 9rem);
 }
 
 .eyebrow {
@@ -93,9 +97,103 @@ h1 {
   text-decoration: none;
 }
 
+.academic-projects {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3rem, 7vw, 5rem);
+  border-top: 0.125rem solid #171717;
+}
+
+.section-heading h2 {
+  max-width: 8ch;
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+
+.section-heading p {
+  max-width: 28rem;
+  margin: 1.25rem 0 0;
+  color: #4c4c4c;
+  line-height: 1.6;
+}
+
+.academic-project-list {
+  min-width: 0;
+}
+
+.academic-project {
+  padding: 0 0 clamp(2.5rem, 6vw, 4.5rem);
+}
+
+.project-context {
+  margin: 1rem 0 0;
+  color: #093fb4;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.academic-project h3 {
+  max-width: 21ch;
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.academic-project-details {
+  margin: 1.75rem 0 0;
+}
+
+.academic-project-details > div {
+  display: grid;
+  grid-template-columns: minmax(5rem, 0.25fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: 1rem 0;
+  border-top: 0.0625rem solid #bbb9b0;
+}
+
+.academic-project-details dt {
+  color: #4c4c4c;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.academic-project-details dd {
+  max-width: 44rem;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.project-outcome dd {
+  color: #093fb4;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 @media (max-width: 34rem) {
   .site-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .academic-projects {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading h2 {
+    max-width: none;
+  }
+
+  .academic-project-details > div {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
   }
 }

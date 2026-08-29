@@ -9,7 +9,7 @@
     "check": "astro check",
     "dev": "astro dev",
     "test": "npm run build && npm run test:foundation && npm run audit",
-    "test:foundation": "node --test tests/*.test.mjs"
+    "test:foundation": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",

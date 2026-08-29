@@ -1,10 +1,16 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { selectPublishedProjects } from "../content/project-schema";
 
 const title = "Muhammad Haziq Aiman Anuar | Software Engineer";
 const description =
   "Software engineer building secure web systems, with research experience in AI and computer vision. Explore MyConference and academic projects.";
 const resumePath = "/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
+const projects = selectPublishedProjects(await getCollection("projects"));
+const academicProjects = projects.filter(
+  (project) => project.projectType === "academic",
+);
 ---
 
 <BaseLayout title={title} description={description}>
@@ -16,16 +22,50 @@ const resumePath = "/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
     </nav>
   </header>
 
-  <main>
-    <p class="eyebrow">Software engineer · Kuala Terengganu, Malaysia</p>
-    <h1>Muhammad Haziq Aiman Anuar</h1>
-    <p class="introduction">
-      I build secure, production-oriented web systems, with applied AI and computer
-      vision as a second field of work.
-    </p>
-    <div class="actions">
-      <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Contact me</a>
-      <a href={resumePath} download>Download resume</a>
-    </div>
+  <main id="main-content">
+    <section class="introduction-section" aria-labelledby="introduction-heading">
+      <p class="eyebrow">Software engineer · Kuala Terengganu, Malaysia</p>
+      <h1 id="introduction-heading">Muhammad Haziq Aiman Anuar</h1>
+      <p class="introduction">
+        I build secure, production-oriented web systems, with applied AI and computer
+        vision as a second field of work.
+      </p>
+      <div class="actions">
+        <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Contact me</a>
+        <a href={resumePath} download>Download resume</a>
+      </div>
+    </section>
+
+    {academicProjects.length > 0 && (
+      <section class="academic-projects" aria-labelledby="academic-projects-heading">
+        <header class="section-heading">
+          <h2 id="academic-projects-heading">Academic projects</h2>
+          <p>Applied AI and computer vision work completed at UiTM.</p>
+        </header>
+
+        <div class="academic-project-list">
+          {academicProjects.map((project) => (
+            <article class="academic-project">
+              <h3>{project.title}</h3>
+              <p class="project-context">{project.contextLabel}</p>
+              <dl class="academic-project-details">
+                <div>
+                  <dt>Problem</dt>
+                  <dd>{project.academic.problem}</dd>
+                </div>
+                <div>
+                  <dt>Approach</dt>
+                  <dd>{project.academic.approach}</dd>
+                </div>
+                <div class="project-outcome">
+                  <dt>Outcome</dt>
+                  <dd>{project.academic.outcome}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
   </main>
 </BaseLayout>
