@@ -13,8 +13,18 @@ permissions:
 
 jobs:
   safari:
+    name: safari (${{ matrix.motion }})
     runs-on: macos-15
     timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        motion:
+          - standard
+          - reduced
+    env:
+      EXPECT_REDUCED_MOTION: ${{ matrix.motion == 'reduced' }}
+      PRIOR_SAFARI_RUN_URL: https://github.com/LeHaziq/LeHaziq.github.io/actions/runs/33310196035
     steps:
       - uses: actions/checkout@v7
 
@@ -31,6 +41,13 @@ jobs:
         shell: bash
         run: |
           defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+          defaults write com.apple.Safari WebKitTabToLinksPreferenceKey -bool true
+          defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks -bool true
+          if [[ "$EXPECT_REDUCED_MOTION" == "true" ]]; then
+            defaults write com.apple.universalaccess reduceMotion -bool true
+          else
+            defaults write com.apple.universalaccess reduceMotion -bool false
+          fi
           sudo safaridriver --enable
           safaridriver --port 4444 > "$RUNNER_TEMP/safaridriver.log" 2>&1 &
           echo "$!" > "$RUNNER_TEMP/safaridriver.pid"
@@ -45,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: safari-acceptance
+          name: safari-acceptance-${{ matrix.motion }}
           path: |
             tests/artifacts/safari-acceptance.json
             tests/artifacts/safari-desktop.png

@@ -6,6 +6,7 @@ const webdriverUrl = process.env.WEBDRIVER_URL ?? "http://127.0.0.1:4444";
 const portfolioUrl = process.env.PORTFOLIO_URL ?? "https://lehaziq.github.io/";
 const artifactDirectory = new URL("../tests/artifacts/", import.meta.url);
 const expectedTitle = "Muhammad Haziq Aiman Anuar | Software Engineer";
+const expectedReducedMotion = process.env.EXPECT_REDUCED_MOTION === "true";
 
 export function evaluateSnapshot(snapshot) {
   const failures = [];
@@ -375,6 +376,20 @@ async function run() {
       await execute(`document.getElementById('${sectionId}').scrollIntoView();`);
       await new Promise((resolve) => setTimeout(resolve, 700));
     }
+    for (let imageIndex = 0; imageIndex < snapshot.imageCount; imageIndex += 1) {
+      await execute(
+        "document.querySelectorAll('main img')[arguments[0]].scrollIntoView();",
+        [imageIndex],
+      );
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        const loaded = await execute(
+          "const image = document.querySelectorAll('main img')[arguments[0]]; return image.complete && image.naturalWidth > 0;",
+          [imageIndex],
+        );
+        if (loaded) break;
+        await new Promise((resolve) => setTimeout(resolve, 250));
+      }
+    }
     const signature = await execute(`
       return {
         states: Array.from(document.querySelectorAll('[data-signature-pass]'))
@@ -383,7 +398,12 @@ async function run() {
         reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
       };
     `);
-    if (signature.states.some((state) => state !== "complete") || signature.storedCount !== "3") {
+    const expectedSignatureState = expectedReducedMotion ? "static" : "complete";
+    if (signature.reducedMotion !== expectedReducedMotion) {
+      failures.push("Safari motion preference does not match the requested acceptance state");
+    }
+    if (signature.states.some((state) => state !== expectedSignatureState) ||
+        signature.storedCount !== "3") {
       failures.push("signature interaction did not reveal all three passes once");
     }
     snapshot.failedImages = await execute(`
@@ -503,6 +523,7 @@ async function run() {
         session.capabilities?.browserVersion ?? process.env.SAFARI_VERSION ?? "unknown",
       platformName: session.capabilities?.platformName ?? "macOS",
       operatingSystemVersion: process.env.MACOS_VERSION ?? "unknown",
+      motionPreference: expectedReducedMotion ? "reduced" : "standard",
       sourceCommit: process.env.GITHUB_SHA ?? "local",
       workflowRunUrl:
         process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
@@ -524,7 +545,17 @@ async function run() {
       missingPage,
       missingLayout,
       returnAction,
-      runKind: "Initial native Safari acceptance",
+      runKind: process.env.PRIOR_SAFARI_RUN_URL
+        ? "Native Safari acceptance rerun"
+        : "Initial native Safari acceptance",
+      priorRunUrl: process.env.PRIOR_SAFARI_RUN_URL ?? null,
+      resolvedHarnessDefects: process.env.PRIOR_SAFARI_RUN_URL
+        ? [
+            "Enabled Safari keyboard focus for links before starting SafariDriver.",
+            "Loaded each lazy image in its viewport before checking render dimensions.",
+            "Tested standard and reduced-motion signature states separately.",
+          ]
+        : [],
       result: failures.length === 0 ? "Pass" : "Fail",
       defects: failures.map((description) => ({
         description,
