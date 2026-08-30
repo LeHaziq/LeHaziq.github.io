@@ -55,6 +55,18 @@ function academicProject(overrides = {}) {
   };
 }
 
+function workflowEvidenceReferences(firstEvidence = "fixture-evidence") {
+  return [
+    firstEvidence,
+    "fixture-evidence",
+    "fixture-evidence",
+    "fixture-evidence",
+    "fixture-evidence",
+    "fixture-evidence",
+    "fixture-evidence",
+  ];
+}
+
 function validationMessages(result) {
   assert.equal(result.success, false);
   return result.error.issues.map((issue) => issue.message).join("\n");
@@ -393,15 +405,7 @@ test("the schema represents every approved Featured project block", () => {
       {
         type: "workflow",
         heading: "Review workflow",
-        steps: [
-          { stage: "call-for-papers", evidenceReference: "fixture-evidence" },
-          { stage: "submission", evidenceReference: "fixture-evidence" },
-          { stage: "reviewer-assignment", evidenceReference: "fixture-evidence" },
-          { stage: "review", evidenceReference: "fixture-evidence" },
-          { stage: "decision", evidenceReference: "fixture-evidence" },
-          { stage: "revision", evidenceReference: "fixture-evidence" },
-          { stage: "camera-ready-upload", evidenceReference: "fixture-evidence" },
-        ],
+        stepEvidenceReferences: workflowEvidenceReferences(),
       },
       {
         type: "engineering-decision",
@@ -436,38 +440,22 @@ test("the schema represents every approved Featured project block", () => {
   assert.equal(projectSchema.safeParse(project).success, true);
 });
 
-test("Featured workflow blocks reject stages outside the approved order", () => {
-  const steps = [
-    { stage: "call-for-papers", evidenceReference: "fixture-evidence" },
-    { stage: "submission", evidenceReference: "fixture-evidence" },
-    { stage: "reviewer-assignment", evidenceReference: "fixture-evidence" },
-    { stage: "review", evidenceReference: "fixture-evidence" },
-    { stage: "decision", evidenceReference: "fixture-evidence" },
-    { stage: "revision", evidenceReference: "fixture-evidence" },
-    { stage: "camera-ready-upload", evidenceReference: "fixture-evidence" },
-  ];
-  [steps[3], steps[4]] = [steps[4], steps[3]];
-
+test("Featured workflow blocks accept project-specific ordered evidence", () => {
   const result = featuredBlockSchema.safeParse({
     type: "workflow",
     heading: "Review workflow",
-    steps,
+    stepEvidenceReferences: ["opening", "middle", "closing"],
   });
 
-  assert.match(validationMessages(result), /approved workflow order/i);
+  assert.equal(result.success, true);
 });
 
 test("Featured workflow blocks keep public claims in evidence records", () => {
   const result = featuredBlockSchema.safeParse({
     type: "workflow",
     heading: "Review workflow",
-    steps: [
-      {
-        stage: "call-for-papers",
-        evidenceReference: "fixture-evidence",
-        claim: "A duplicated public claim.",
-      },
-    ],
+    stepEvidenceReferences: ["fixture-evidence"],
+    claim: "A duplicated public claim.",
   });
 
   assert.match(validationMessages(result), /Unrecognized key.*claim/);
@@ -619,15 +607,9 @@ test("project publication rejects workflow references to draft evidence", () => 
       {
         type: "workflow",
         heading: "Review workflow",
-        steps: [
-          { stage: "call-for-papers", evidenceReference: "draft-workflow-evidence" },
-          { stage: "submission", evidenceReference: "fixture-evidence" },
-          { stage: "reviewer-assignment", evidenceReference: "fixture-evidence" },
-          { stage: "review", evidenceReference: "fixture-evidence" },
-          { stage: "decision", evidenceReference: "fixture-evidence" },
-          { stage: "revision", evidenceReference: "fixture-evidence" },
-          { stage: "camera-ready-upload", evidenceReference: "fixture-evidence" },
-        ],
+        stepEvidenceReferences: workflowEvidenceReferences(
+          "draft-workflow-evidence",
+        ),
       },
     ],
     academic: undefined,
@@ -636,6 +618,32 @@ test("project publication rejects workflow references to draft evidence", () => 
   assert.throws(
     () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
     /references draft evidence "draft-workflow-evidence"/,
+  );
+});
+
+test("the project schema rejects unapproved published workflow evidence", () => {
+  const project = {
+    ...academicProject(),
+    projectType: "featured",
+    evidence: [
+      {
+        ...academicProject().evidence[0],
+        publicationApproved: false,
+      },
+    ],
+    blocks: [
+      {
+        type: "workflow",
+        heading: "Review workflow",
+        stepEvidenceReferences: workflowEvidenceReferences(),
+      },
+    ],
+  };
+  delete project.academic;
+
+  assert.match(
+    validationMessages(projectSchema.safeParse(project)),
+    /Published evidence requires publication approval/,
   );
 });
 

@@ -65,6 +65,7 @@ evidence:
   - id: workflow-call-for-papers
     publicationStatus: published
     publicClaim: The workflow opens with a call for papers.
+    publicCaption: Call for papers
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -73,6 +74,7 @@ evidence:
   - id: workflow-submission
     publicationStatus: published
     publicClaim: A submission enters the peer-review record.
+    publicCaption: Submission
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -81,6 +83,7 @@ evidence:
   - id: workflow-reviewer-assignment
     publicationStatus: published
     publicClaim: Reviewer assignment connects that record to its reviewer.
+    publicCaption: Reviewer assignment
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -89,6 +92,7 @@ evidence:
   - id: workflow-review
     publicationStatus: published
     publicClaim: The review records the assessment for the submission.
+    publicCaption: Review
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -97,6 +101,7 @@ evidence:
   - id: workflow-decision
     publicationStatus: published
     publicClaim: A decision records the outcome of peer review.
+    publicCaption: Decision
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -105,6 +110,7 @@ evidence:
   - id: workflow-revision
     publicationStatus: published
     publicClaim: Revision returns the submission for its next version.
+    publicCaption: Revision
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -113,6 +119,7 @@ evidence:
   - id: workflow-camera-ready-upload
     publicationStatus: published
     publicClaim: Camera-ready upload completes the record.
+    publicCaption: Camera-ready upload
     evidenceType: repository
     provenance: Approved source and workflow documentation review
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
@@ -130,21 +137,14 @@ blocks:
       - accessibility-and-pilot
   - type: workflow
     heading: "MyConference: workflow"
-    steps:
-      - stage: call-for-papers
-        evidenceReference: workflow-call-for-papers
-      - stage: submission
-        evidenceReference: workflow-submission
-      - stage: reviewer-assignment
-        evidenceReference: workflow-reviewer-assignment
-      - stage: review
-        evidenceReference: workflow-review
-      - stage: decision
-        evidenceReference: workflow-decision
-      - stage: revision
-        evidenceReference: workflow-revision
-      - stage: camera-ready-upload
-        evidenceReference: workflow-camera-ready-upload
+    stepEvidenceReferences:
+      - workflow-call-for-papers
+      - workflow-submission
+      - workflow-reviewer-assignment
+      - workflow-review
+      - workflow-decision
+      - workflow-revision
+      - workflow-camera-ready-upload
 ---
 
 This readable record is the complete source for the first two MyConference evidence passes.

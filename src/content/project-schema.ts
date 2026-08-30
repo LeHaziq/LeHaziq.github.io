@@ -138,53 +138,10 @@ const narrativeBlockSchema = z.object({
   evidenceReferences,
 }).strict();
 
-export const workflowStages = [
-  "call-for-papers",
-  "submission",
-  "reviewer-assignment",
-  "review",
-  "decision",
-  "revision",
-  "camera-ready-upload",
-] as const;
-
-export const workflowStageLabels: Record<(typeof workflowStages)[number], string> = {
-  "call-for-papers": "Call for papers",
-  submission: "Submission",
-  "reviewer-assignment": "Reviewer assignment",
-  review: "Review",
-  decision: "Decision",
-  revision: "Revision",
-  "camera-ready-upload": "Camera-ready upload",
-};
-
-const workflowStepsSchema = z
-  .array(
-    z.object({
-      stage: z.enum(workflowStages),
-      evidenceReference: stableId,
-    }).strict(),
-  )
-  .length(
-    workflowStages.length,
-    "Workflow blocks require all seven approved stages",
-  )
-  .superRefine((steps, context) => {
-    for (const [index, expectedStage] of workflowStages.entries()) {
-      if (steps[index]?.stage !== expectedStage) {
-        context.addIssue({
-          code: "custom",
-          path: [index, "stage"],
-          message: "Workflow stages must follow the approved workflow order",
-        });
-      }
-    }
-  });
-
 const workflowBlockSchema = z.object({
   type: z.literal("workflow"),
   heading: requiredText("Workflow heading"),
-  steps: workflowStepsSchema,
+  stepEvidenceReferences: evidenceReferences,
 }).strict();
 
 const engineeringDecisionBlockSchema = z.object({
@@ -403,7 +360,7 @@ function referencedEvidence(project: Project): string[] {
       return [block.evidenceReference];
     }
     if (block.type === "workflow") {
-      return block.steps.map((step) => step.evidenceReference);
+      return block.stepEvidenceReferences;
     }
     return block.evidenceReferences;
   });
@@ -476,6 +433,17 @@ export function selectPublishedProjects(
 
     if (entry.data.projectType === "featured") {
       for (const block of entry.data.blocks) {
+        if (block.type === "workflow") {
+          for (const evidenceId of block.stepEvidenceReferences) {
+            const evidence = evidenceById.get(evidenceId);
+            if (!evidence?.publicCaption) {
+              throw new Error(
+                `Project "${entry.data.projectSlug}" workflow evidence "${evidenceId}" requires a public caption`,
+              );
+            }
+          }
+        }
+
         if (block.type === "media" && !assetIds.has(block.assetReference)) {
           throw new Error(
             `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,

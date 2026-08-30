@@ -1,10 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import {
-  selectPublishedProjects,
-  workflowStageLabels,
-} from "../content/project-schema";
+import { selectPublishedProjects } from "../content/project-schema";
 import type { PublishedProject } from "../content/project-schema";
 
 const title = "Muhammad Haziq Aiman Anuar | Software Engineer";
@@ -17,7 +14,7 @@ type FeaturedBlock = FeaturedProject["blocks"][number];
 type FeaturedEvidence = FeaturedProject["evidence"][number];
 type NarrativeBlock = Extract<FeaturedBlock, { type: "narrative" }>;
 type WorkflowBlock = Extract<FeaturedBlock, { type: "workflow" }>;
-type FeaturedPass =
+type RenderedFeaturedBlock =
   | {
       type: "narrative";
       project: FeaturedProject;
@@ -28,13 +25,10 @@ type FeaturedPass =
       type: "workflow";
       project: FeaturedProject;
       block: WorkflowBlock;
-      steps: Array<WorkflowBlock["steps"][number] & {
-        label: string;
-        evidence: FeaturedEvidence | undefined;
-      }>;
+      evidence: Array<FeaturedEvidence | undefined>;
     };
 
-const featuredPasses: FeaturedPass[] = [];
+const renderedFeaturedBlocks: RenderedFeaturedBlock[] = [];
 for (const project of projects) {
   if (project.projectType !== "featured") {
     continue;
@@ -46,7 +40,7 @@ for (const project of projects) {
 
   for (const block of project.blocks) {
     if (block.type === "narrative") {
-      featuredPasses.push({
+      renderedFeaturedBlocks.push({
         type: "narrative",
         project,
         block,
@@ -57,15 +51,13 @@ for (const project of projects) {
     }
 
     if (block.type === "workflow") {
-      featuredPasses.push({
+      renderedFeaturedBlocks.push({
         type: "workflow",
         project,
         block,
-        steps: block.steps.map((step) => ({
-          ...step,
-          label: workflowStageLabels[step.stage],
-          evidence: evidenceById.get(step.evidenceReference),
-        })),
+        evidence: block.stepEvidenceReferences.map((evidenceId) =>
+          evidenceById.get(evidenceId),
+        ),
       });
     }
   }
@@ -151,7 +143,7 @@ const chronologyGroups = [
       </div>
     </section>
 
-    {featuredPasses.map((pass) => pass.type === "narrative" ? (
+    {renderedFeaturedBlocks.map((pass) => pass.type === "narrative" ? (
         <section
           id={pass.project.projectSlug}
           class="featured-project-pass"
@@ -187,14 +179,11 @@ const chronologyGroups = [
           </header>
 
           <ol class="workflow-list">
-            {pass.steps.map((step) => step.evidence && (
-              <li
-                id={`${pass.project.projectSlug}-evidence-${step.evidence.id}`}
-                data-workflow-stage={step.stage}
-              >
+            {pass.evidence.map((record) => record && (
+              <li id={`${pass.project.projectSlug}-evidence-${record.id}`}>
                 <div>
-                  <h3>{step.label}</h3>
-                  <p>{step.evidence.publicClaim}</p>
+                  <h3>{record.publicCaption}</h3>
+                  <p>{record.publicClaim}</p>
                 </div>
               </li>
             ))}
