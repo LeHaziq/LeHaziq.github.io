@@ -183,6 +183,40 @@ test("public pages keep content and actions at narrow and zoomed layouts", async
   }
 });
 
+test("section heading glyphs stay clear of adjacent content", async ({ page }) => {
+  for (const width of [840, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+
+    const collisions = await page.evaluate(() => {
+      const textBounds = (element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return range.getBoundingClientRect();
+      };
+
+      return Array.from(
+        document.querySelectorAll(".featured-pass-heading, .section-heading"),
+      ).flatMap((sectionHeading) => {
+        const heading = sectionHeading.querySelector("h2");
+        const content = sectionHeading.nextElementSibling;
+        if (!heading || !content) {
+          return [];
+        }
+
+        const headingBounds = textBounds(heading);
+        const contentBounds = content.getBoundingClientRect();
+        return headingBounds.right > contentBounds.left
+          ? [heading.textContent?.trim()]
+          : [];
+      });
+    });
+
+    expect(collisions, `heading collisions at ${width}px`).toEqual([]);
+  }
+});
+
 test("interactive targets reach the 44 CSS pixel design aim", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
 

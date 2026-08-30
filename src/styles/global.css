@@ -296,7 +296,7 @@ h1 {
 .chronology,
 .contact-close {
   display: grid;
-  grid-template-columns: minmax(13rem, 0.55fr) minmax(0, 1.45fr);
+  grid-template-columns: minmax(13rem, 0.9fr) minmax(0, 1.45fr);
   gap: clamp(2rem, 7vw, 7rem);
   margin-top: 1rem;
   padding: clamp(3.5rem, 8vw, 7rem) clamp(1.25rem, 5vw, 5rem);
