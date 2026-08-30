@@ -84,10 +84,7 @@ test("the manuscript exposes the approved actions and destinations", async () =>
   );
   assert.match(footer, /href="mailto:haziqaimanfb@gmail\.com"[^>]*>haziqaimanfb@gmail\.com<\/a>/);
   assert.match(footer, /href="https:\/\/github\.com\/LeHaziq"[^>]*>GitHub<\/a>/);
-  assert.match(
-    footer,
-    /href="https:\/\/www\.linkedin\.com\/in\/muhammad-haziq-aiman-anuar-5119b1261\/"[^>]*>LinkedIn<\/a>/,
-  );
+  assert.doesNotMatch(footer, /linkedin\.com|>LinkedIn<\/a>/i);
   assert.match(
     footer,
     /href="\/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26\.pdf"[^>]*download[^>]*>Resume<\/a>/,
