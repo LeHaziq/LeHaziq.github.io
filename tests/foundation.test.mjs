@@ -93,3 +93,74 @@ test("the disclosure audit rejects dotenv files", async () => {
     await rm(fixture, { force: true });
   }
 });
+
+test("the disclosure audit requires project assets to be governed", async () => {
+  const asset = new URL(
+    "../src/assets/projects/myconference/audit-fixture.png",
+    import.meta.url,
+  );
+  const record = new URL(
+    "../src/content/projects/audit-fixture.md",
+    import.meta.url,
+  );
+  const onePixelPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+    "base64",
+  );
+
+  await writeFile(asset, onePixelPng);
+  try {
+    await assert.rejects(
+      execFileAsync(process.execPath, ["scripts/audit-disclosure.mjs"], {
+        cwd: repositoryRoot,
+      }),
+      (error) => {
+        assert.match(error.stderr, /ungoverned project asset/);
+        return true;
+      },
+    );
+
+    await writeFile(
+      record,
+      `---
+assets:
+  - id: audit-fixture
+    path: src/assets/projects/myconference/audit-fixture.png
+    publicationApproved: false
+---
+`,
+    );
+    await assert.rejects(
+      execFileAsync(process.execPath, ["scripts/audit-disclosure.mjs"], {
+        cwd: repositoryRoot,
+      }),
+      (error) => {
+        assert.match(error.stderr, /ungoverned project asset/);
+        return true;
+      },
+    );
+
+    await writeFile(
+      record,
+      `---
+assets:
+  - id: audit-fixture
+    path: src/assets/projects/myconference/audit-fixture.png
+    publicationApproved: true
+---
+`,
+    );
+
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      ["scripts/audit-disclosure.mjs"],
+      { cwd: repositoryRoot },
+    );
+    assert.match(stdout, /Disclosure audit passed/);
+  } finally {
+    await Promise.all([
+      rm(asset, { force: true }),
+      rm(record, { force: true }),
+    ]);
+  }
+});

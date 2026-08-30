@@ -715,6 +715,90 @@ test("the project schema rejects unapproved assets", () => {
   assert.match(messages, /Project assets require publication approval/);
 });
 
+test("the project schema rejects incomplete informative media", () => {
+  const asset = {
+    id: "fixture-capture",
+    path: "src/assets/projects/fixture.png",
+    kind: "runtime-capture",
+    ownerOrProvenance: "Fresh fixture capture",
+    publicationApproved: true,
+    caption: "Fixture capture.",
+    alternativeText: "A fictional fixture screen.",
+    evidenceReferences: ["fixture-evidence"],
+    fictionalDataCheck: "confirmed",
+    decorative: false,
+  };
+
+  for (const [field, value, expectedMessage] of [
+    ["caption", "", /Asset caption is required/i],
+    ["alternativeText", "", /useful alternative text/i],
+    ["evidenceReferences", [], /supporting evidence/i],
+    ["fictionalDataCheck", "not-applicable", /confirmed fictional-data check/i],
+  ]) {
+    const project = academicProject({
+      assets: [{ ...asset, [field]: value }],
+    });
+
+    assert.match(
+      validationMessages(projectSchema.safeParse(project)),
+      expectedMessage,
+      field,
+    );
+  }
+});
+
+test("project publication rejects media metadata that differs from its asset", () => {
+  const asset = {
+    id: "fixture-capture",
+    path: "src/assets/projects/fixture.png",
+    kind: "runtime-capture",
+    ownerOrProvenance: "Fresh fixture capture",
+    publicationApproved: true,
+    caption: "Fixture capture.",
+    alternativeText: "A fictional fixture screen.",
+    evidenceReferences: ["fixture-evidence"],
+    fictionalDataCheck: "confirmed",
+    decorative: false,
+  };
+  const mediaBlock = {
+    type: "media",
+    assetReference: asset.id,
+    caption: asset.caption,
+    alternativeText: asset.alternativeText,
+    evidenceReferences: asset.evidenceReferences,
+  };
+
+  for (const [field, value] of [
+    ["caption", "Different caption."],
+    ["alternativeText", "Different alternative text."],
+    ["evidenceReferences", ["different-evidence"]],
+  ]) {
+    const project = projectSchema.parse({
+      ...academicProject(),
+      projectType: "featured",
+      assets: [asset],
+      blocks: [{ ...mediaBlock, [field]: value }],
+      evidence:
+        field === "evidenceReferences"
+          ? [
+              ...academicProject().evidence,
+              {
+                ...academicProject().evidence[0],
+                id: "different-evidence",
+              },
+            ]
+          : academicProject().evidence,
+      academic: undefined,
+    });
+
+    assert.throws(
+      () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
+      new RegExp(`media ${field} does not match asset "fixture-capture"`),
+      field,
+    );
+  }
+});
+
 test("project publication rejects duplicate slugs", () => {
   const first = projectSchema.parse(academicProject());
   const second = projectSchema.parse(academicProject({ title: "Second fixture" }));
@@ -889,6 +973,43 @@ test("project publication rejects assets with missing evidence references", () =
   assert.throws(
     () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
     /asset "fixture-image" references missing evidence "missing-evidence"/,
+  );
+});
+
+test("the Portfolio renders governed MyConference visuals with reserved dimensions", async () => {
+  const rootPage = await readFile(generatedRootPage, "utf8");
+  const visualSectionIndex = rootPage.indexOf(
+    'id="myconference-visual-evidence"',
+  );
+  const academicIndex = rootPage.indexOf('class="academic-projects"');
+  const visualSection = rootPage.slice(visualSectionIndex, academicIndex);
+
+  assert.ok(visualSectionIndex > -1);
+  assert.ok(academicIndex > visualSectionIndex);
+  assert.match(visualSection, /MyConference: evidence visuals/);
+  assert.match(visualSection, /Current Conference home at desktop width/);
+  assert.match(visualSection, /Current Conference home at phone width/);
+  assert.match(visualSection, /Tenant isolation, in layers/);
+  assert.match(visualSection, /loading="lazy"/);
+  assert.match(visualSection, /width="1440" height="1000"/);
+  assert.match(visualSection, /width="390" height="844"/);
+  assert.match(visualSection, /width="1440" height="960"/);
+  assert.match(visualSection, /srcset=/);
+  assert.match(
+    visualSection,
+    /alt="MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines\."/,
+  );
+  assert.match(
+    visualSection,
+    /alt="MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column\."/,
+  );
+  assert.match(
+    visualSection,
+    /alt="Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404\."/,
+  );
+  assert.doesNotMatch(
+    visualSection,
+    /Aether|UMT|IMTC|manuscript rating|prototype only|current\/proposed/i,
   );
 });
 

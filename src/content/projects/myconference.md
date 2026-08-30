@@ -215,7 +215,78 @@ evidence:
     attribution: MyConference PHP test-suite optimization led by Muhammad Haziq Aiman Anuar within the current Laravel rebuild.
     publicationApproved: true
     qualifier: Measured on 29 August 2026
-assets: []
+  - id: conference-home-desktop-visual
+    publicationStatus: published
+    publicClaim: A fresh desktop-width runtime capture records the current MyConference Conference home with an unmistakably fictional Organisation, Conference, papers, counts, account, and 2099 dates.
+    evidenceType: runtime-capture
+    provenance: Fresh local capture of the current MyConference runtime using an isolated fictional dataset
+    attribution: Current MyConference runtime interface led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Runtime captured 30 August 2026
+    assetReference: conference-home-desktop
+    publicCaption: Current Conference home at desktop width
+    alternativeText: MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines.
+  - id: conference-home-phone-visual
+    publicationStatus: published
+    publicClaim: A fresh phone-width runtime capture records the same fictional MyConference Conference home in its current responsive layout.
+    evidenceType: runtime-capture
+    provenance: Fresh local capture of the current MyConference runtime using the same isolated fictional dataset as the desktop capture
+    attribution: Current MyConference responsive interface led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Runtime captured 30 August 2026
+    assetReference: conference-home-phone
+    publicCaption: Current Conference home at phone width
+    alternativeText: MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column.
+  - id: tenant-isolation-visual
+    publicationStatus: published
+    publicClaim: The tenant-isolation diagram explains the approved application and database boundaries without adding claims beyond the verified MyConference evidence.
+    evidenceType: diagram
+    provenance: Original Portfolio diagram derived from the approved MyConference architecture evidence
+    attribution: MyConference tenant-isolation decisions led by Muhammad Haziq Aiman Anuar; diagram authored for this Portfolio
+    publicationApproved: true
+    assetReference: tenant-isolation-diagram
+    publicCaption: Tenant isolation, in layers
+    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
+assets:
+  - id: conference-home-desktop
+    path: src/assets/projects/myconference/conference-home-desktop.png
+    kind: runtime-capture
+    ownerOrProvenance: Fresh current-runtime capture prepared for Muhammad Haziq Aiman Anuar on 30 August 2026
+    publicationApproved: true
+    caption: Current Conference home at desktop width
+    alternativeText: MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines.
+    evidenceReferences:
+      - conference-home-desktop-visual
+    fictionalDataCheck: confirmed
+    decorative: false
+  - id: conference-home-phone
+    path: src/assets/projects/myconference/conference-home-phone.png
+    kind: runtime-capture
+    ownerOrProvenance: Fresh current-runtime capture prepared for Muhammad Haziq Aiman Anuar on 30 August 2026
+    publicationApproved: true
+    caption: Current Conference home at phone width
+    alternativeText: MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column.
+    evidenceReferences:
+      - conference-home-phone-visual
+    fictionalDataCheck: confirmed
+    decorative: false
+  - id: tenant-isolation-diagram
+    path: src/assets/projects/myconference/tenant-isolation.svg
+    kind: diagram
+    ownerOrProvenance: Original Portfolio diagram authored from approved MyConference architecture evidence
+    publicationApproved: true
+    caption: Tenant isolation, in layers
+    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
+    evidenceReferences:
+      - tenant-isolation-visual
+      - tenant-table-ownership
+      - composite-tenant-keys
+      - application-tenant-scopes
+      - forced-row-level-security
+      - missing-organisation-context
+      - cross-tenant-not-found
+    fictionalDataCheck: not-applicable
+    decorative: false
 blocks:
   - type: narrative
     heading: "MyConference: ownership and problem"
@@ -298,6 +369,30 @@ blocks:
     unit: seconds
     qualifier: Measured on 29 August 2026
     evidenceReference: historical-test-optimization
+  - type: media
+    assetReference: conference-home-desktop
+    caption: Current Conference home at desktop width
+    alternativeText: MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines.
+    evidenceReferences:
+      - conference-home-desktop-visual
+  - type: media
+    assetReference: conference-home-phone
+    caption: Current Conference home at phone width
+    alternativeText: MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column.
+    evidenceReferences:
+      - conference-home-phone-visual
+  - type: media
+    assetReference: tenant-isolation-diagram
+    caption: Tenant isolation, in layers
+    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
+    evidenceReferences:
+      - tenant-isolation-visual
+      - tenant-table-ownership
+      - composite-tenant-keys
+      - application-tenant-scopes
+      - forced-row-level-security
+      - missing-organisation-context
+      - cross-tenant-not-found
 ---
 
-This readable record is the complete source for all three MyConference evidence passes and the historical optimization.
+This readable record is the complete source for the MyConference evidence passes, historical optimization, and approved visual evidence.

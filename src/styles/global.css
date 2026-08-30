@@ -105,6 +105,7 @@ h1 {
 .featured-workflow-pass,
 .featured-safeguards-pass,
 .historical-optimization,
+.featured-media-pass,
 .academic-projects,
 .chronology {
   margin-inline: calc(50% - 50cqw);
@@ -388,6 +389,62 @@ h1 {
   line-height: 1.6;
 }
 
+.featured-media-pass {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(4rem, 9vw, 7rem);
+  background: #171717;
+  color: #fff;
+}
+
+.media-pass-heading h2 {
+  max-width: 11ch;
+}
+
+.media-pass-heading > p {
+  color: #d7d5cd;
+  line-height: 1.55;
+}
+
+.evidence-visuals {
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  min-width: 0;
+}
+
+.evidence-visual {
+  min-width: 0;
+  margin: 0;
+}
+
+.evidence-visual-desktop {
+  grid-column: 1 / -1;
+}
+
+.evidence-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #f5f4ef;
+  box-shadow: 0 0.75rem 2rem rgb(0 0 0 / 0.28);
+}
+
+.evidence-visual-phone img {
+  max-width: 24.375rem;
+  margin-inline: auto;
+}
+
+.evidence-visual figcaption {
+  padding-top: 0.875rem;
+  border-top: 0.125rem solid #b42318;
+  color: #f5f4ef;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
 .academic-projects,
 .chronology {
   display: grid;
@@ -561,8 +618,17 @@ h1 {
 
 @media (max-width: 44rem) {
   .featured-safeguards-pass,
-  .historical-optimization {
+  .historical-optimization,
+  .featured-media-pass {
     grid-template-columns: 1fr;
+  }
+
+  .evidence-visuals {
+    grid-template-columns: 1fr;
+  }
+
+  .evidence-visual-desktop {
+    grid-column: auto;
   }
 
   .engineering-decision > div,

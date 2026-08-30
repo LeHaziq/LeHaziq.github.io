@@ -17,6 +17,17 @@ const blockedPathFragments = [
 ];
 const blockedPathSegments = new Set(["issues", "secrets"]);
 const blockedFileExtensions = new Set([".key", ".p12", ".pfx", ".pem"]);
+const governedAssetExtensions = new Set([
+  ".avif",
+  ".gif",
+  ".jpeg",
+  ".jpg",
+  ".png",
+  ".svg",
+  ".webp",
+]);
+const blockedAssetName =
+  /(?:legacy|prototype|manuscript|rating|comparison|design-reference|current-proposed|screenshot)/i;
 const resumeName = "Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
 const blockedText = [
   {
@@ -78,12 +89,53 @@ async function listFiles(directory) {
 const files = await listFiles(repositoryRoot);
 const findings = [];
 let scannedTextFiles = 0;
+const contentFiles = files.filter((file) => {
+  const path = relative(repositoryRoot, file).split(sep).join("/");
+  return path.startsWith("src/content/projects/") && path.endsWith(".md");
+});
+const contentRecords = await Promise.all(
+  contentFiles.map((file) => readFile(file, "utf8")),
+);
+const approvedAssetPaths = new Set(
+  contentRecords.flatMap((contents) =>
+    contents
+      .split(/(?=^  - id:)/gm)
+      .flatMap((record) => {
+        const path = record.match(
+          /^    path:\s*(src\/assets\/projects\/[^\s]+)\s*$/m,
+        )?.[1];
+        return path && /^    publicationApproved:\s*true\s*$/m.test(record)
+          ? [path]
+          : [];
+      }),
+  ),
+);
+const approvedAssetStems = new Set(
+  [...approvedAssetPaths].map((path) => {
+    const fileName = path.split("/").at(-1);
+    return fileName.slice(0, fileName.lastIndexOf("."));
+  }),
+);
+const generatedReferences = (
+  await Promise.all(
+    files
+      .filter((file) => {
+        const path = relative(repositoryRoot, file).split(sep).join("/");
+        return path.startsWith("dist/") && /\.(?:css|html)$/.test(path);
+      })
+      .map((file) => readFile(file, "utf8")),
+  )
+).join("\n");
 
 for (const file of files) {
   const projectPath = relative(repositoryRoot, file).split(sep).join("/");
   const normalizedPath = projectPath.toLowerCase();
   const pathSegments = normalizedPath.split("/");
   const fileName = pathSegments.at(-1);
+  const originalFileName = projectPath.split("/").at(-1);
+  const extensionIndex = fileName.lastIndexOf(".");
+  const extension = extensionIndex === -1 ? "" : fileName.slice(extensionIndex);
+  const isGovernedAsset = governedAssetExtensions.has(extension);
 
   if (fileName === "cname") {
     findings.push(`${projectPath}: committed custom-domain file`);
@@ -108,9 +160,30 @@ for (const file of files) {
     continue;
   }
 
+  if (
+    normalizedPath.startsWith("src/assets/projects/") &&
+    isGovernedAsset
+  ) {
+    if (!approvedAssetPaths.has(projectPath)) {
+      findings.push(`${projectPath}: ungoverned project asset`);
+    }
+    if (blockedAssetName.test(projectPath)) {
+      findings.push(`${projectPath}: blocked legacy or planning asset name`);
+    }
+  }
+
   const bytes = await readFile(file);
   if (bytes.includes(0)) {
-    findings.push(`${projectPath}: unexpected binary file`);
+    const generatedAssetStem = fileName.split(".")[0];
+    const approvedSourceAsset = approvedAssetPaths.has(projectPath);
+    const approvedGeneratedAsset =
+      normalizedPath.startsWith("dist/_astro/") &&
+      approvedAssetStems.has(generatedAssetStem) &&
+      generatedReferences.includes(originalFileName);
+
+    if (!approvedSourceAsset && !approvedGeneratedAsset) {
+      findings.push(`${projectPath}: unexpected binary file`);
+    }
     continue;
   }
 

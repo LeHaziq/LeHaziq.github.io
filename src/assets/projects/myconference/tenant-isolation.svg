@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-labelledby="title description">
+  <title id="title">MyConference tenant isolation</title>
+  <desc id="description">Requests pass through Organisation context and application scopes before forced PostgreSQL row-level security. Tenant tables carry organisation identifiers, and composite Conference and Organisation keys prevent mismatched pairs. Missing Organisation context returns no tenant rows, while cross-tenant requests return 404. Confidential access requires an audited Conference Chair Role Assignment.</desc>
+  <defs>
+    <marker id="arrow-cobalt" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#093fb4"/>
+    </marker>
+    <marker id="arrow-white" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1 1 11 6 1 11Z" fill="#ffffff"/>
+    </marker>
+    <filter id="lift" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#171717" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="960" fill="#f5f4ef"/>
+  <path d="M0 0H1440V18H0Z" fill="#093fb4"/>
+
+  <g font-family="Arial, Helvetica, sans-serif" fill="#171717">
+    <text x="72" y="91" font-size="22" font-weight="700" letter-spacing="2">MYCONFERENCE</text>
+    <text x="72" y="155" font-size="55" font-weight="700" letter-spacing="-2">Tenant isolation, in layers</text>
+    <text x="72" y="198" font-size="23" fill="#4c4c4c">Application checks and database policy defend the same Organisation boundary.</text>
+
+    <g filter="url(#lift)">
+      <rect x="72" y="252" width="408" height="114" rx="14" fill="#ffffff"/>
+      <rect x="960" y="252" width="408" height="114" rx="14" fill="#ffffff"/>
+    </g>
+    <text x="104" y="297" font-size="18" font-weight="700" fill="#093fb4">ORGANISATION A REQUEST</text>
+    <text x="104" y="335" font-size="26" font-weight="700">Conference A record</text>
+    <text x="992" y="297" font-size="18" font-weight="700" fill="#093fb4">ORGANISATION B REQUEST</text>
+    <text x="992" y="335" font-size="26" font-weight="700">Conference B record</text>
+
+    <path d="M276 366V410H720V446" fill="none" stroke="#093fb4" stroke-width="5" marker-end="url(#arrow-cobalt)"/>
+    <path d="M1164 366V410H720" fill="none" stroke="#093fb4" stroke-width="5"/>
+
+    <g filter="url(#lift)">
+      <rect x="252" y="448" width="936" height="156" rx="14" fill="#093fb4"/>
+    </g>
+    <text x="292" y="493" font-size="17" font-weight="700" letter-spacing="1.5" fill="#dce6ff">APPLICATION BOUNDARY</text>
+    <text x="292" y="538" font-size="29" font-weight="700" fill="#ffffff">Organisation context + Eloquent scopes</text>
+    <text x="292" y="574" font-size="20" fill="#dce6ff">Scopes enforce the application-layer tenant boundary.</text>
+    <path d="M720 604V651" fill="none" stroke="#093fb4" stroke-width="5" marker-end="url(#arrow-cobalt)"/>
+
+    <g filter="url(#lift)">
+      <rect x="252" y="653" width="936" height="155" rx="14" fill="#171717"/>
+    </g>
+    <text x="292" y="698" font-size="17" font-weight="700" letter-spacing="1.5" fill="#bbb9b0">DATABASE BOUNDARY</text>
+    <text x="292" y="743" font-size="29" font-weight="700" fill="#ffffff">Forced PostgreSQL row-level security</text>
+    <text x="292" y="779" font-size="20" fill="#e4e2da">Policies protect raw queries as well as application traffic.</text>
+
+    <g>
+      <rect x="72" y="847" width="628" height="72" rx="10" fill="#ffffff" stroke="#bbb9b0"/>
+      <text x="100" y="879" font-size="17" font-weight="700" fill="#093fb4">TENANT TABLES</text>
+      <text x="100" y="906" font-size="19">organisation_id records ownership</text>
+      <rect x="740" y="847" width="628" height="72" rx="10" fill="#ffffff" stroke="#bbb9b0"/>
+      <text x="768" y="879" font-size="17" font-weight="700" fill="#093fb4">COMPOSITE KEYS</text>
+      <text x="768" y="906" font-size="19">Conference + Organisation pairs must match</text>
+    </g>
+
+    <g>
+      <rect x="1030" y="410" width="338" height="194" rx="10" fill="#b42318"/>
+      <text x="1058" y="448" font-size="16" font-weight="700" letter-spacing="1.2" fill="#ffffff">BOUNDARY RESULTS</text>
+      <text x="1058" y="487" font-size="19" font-weight="700" fill="#ffffff">Missing context</text>
+      <text x="1058" y="515" font-size="18" fill="#ffffff">No tenant rows</text>
+      <path d="M1058 539H1340" stroke="#e9a29c"/>
+      <text x="1058" y="571" font-size="19" font-weight="700" fill="#ffffff">Cross-tenant request</text>
+      <text x="1280" y="571" font-size="18" font-weight="700" fill="#ffffff">404</text>
+    </g>
+
+    <g>
+      <rect x="72" y="448" width="142" height="360" rx="10" fill="#ffffff" stroke="#bbb9b0"/>
+      <text x="102" y="481" font-size="15" font-weight="700" letter-spacing="1.2" fill="#b42318">CONFIDENTIAL</text>
+      <text x="102" y="516" font-size="18" font-weight="700">Ownership</text>
+      <text x="102" y="541" font-size="18">does not grant</text>
+      <text x="102" y="566" font-size="18">access.</text>
+      <path d="M102 595H184" stroke="#bbb9b0"/>
+      <text x="102" y="629" font-size="18" font-weight="700">An audited</text>
+      <text x="102" y="654" font-size="18">Conference</text>
+      <text x="102" y="679" font-size="18">Chair Role</text>
+      <text x="102" y="704" font-size="18">Assignment</text>
+      <text x="102" y="729" font-size="18">grants it.</text>
+      <path d="M214 628H252" fill="none" stroke="#093fb4" stroke-width="4" marker-end="url(#arrow-cobalt)"/>
+    </g>
+  </g>
+</svg>

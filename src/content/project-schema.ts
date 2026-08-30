@@ -44,7 +44,7 @@ export const projectAssetSchema = z
     publicationApproved: z.literal(true, {
       error: "Project assets require publication approval",
     }),
-    caption: z.string().trim(),
+    caption: requiredText("Asset caption"),
     alternativeText: z.string().trim(),
     evidenceReferences: z.array(stableId),
     fictionalDataCheck: z.enum(["confirmed", "not-applicable"]),
@@ -431,7 +431,10 @@ export function selectPublishedProjects(
     const evidenceById = new Map(
       entry.data.evidence.map((evidence) => [evidence.id, evidence]),
     );
-    const assetIds = new Set(entry.data.assets.map((asset) => asset.id));
+    const assetsById = new Map(
+      entry.data.assets.map((asset) => [asset.id, asset]),
+    );
+    const assetIds = new Set(assetsById.keys());
 
     for (const evidenceId of referencedEvidence(entry.data)) {
       assertEvidenceReference(
@@ -494,10 +497,32 @@ export function selectPublishedProjects(
           }
         }
 
-        if (block.type === "media" && !assetIds.has(block.assetReference)) {
-          throw new Error(
-            `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,
-          );
+        if (block.type === "media") {
+          const asset = assetsById.get(block.assetReference);
+          if (!asset) {
+            throw new Error(
+              `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,
+            );
+          }
+
+          if (block.caption !== asset.caption) {
+            throw new Error(
+              `Project "${entry.data.projectSlug}" media caption does not match asset "${asset.id}"`,
+            );
+          }
+          if (block.alternativeText !== asset.alternativeText) {
+            throw new Error(
+              `Project "${entry.data.projectSlug}" media alternativeText does not match asset "${asset.id}"`,
+            );
+          }
+          if (
+            JSON.stringify(block.evidenceReferences) !==
+            JSON.stringify(asset.evidenceReferences)
+          ) {
+            throw new Error(
+              `Project "${entry.data.projectSlug}" media evidenceReferences does not match asset "${asset.id}"`,
+            );
+          }
         }
       }
     }
