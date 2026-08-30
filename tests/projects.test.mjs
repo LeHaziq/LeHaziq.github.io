@@ -996,15 +996,16 @@ test("project publication rejects assets with missing evidence references", () =
 
 test("the Portfolio renders governed MyConference visuals with reserved dimensions", async () => {
   const rootPage = await readFile(generatedRootPage, "utf8");
-  const visualSectionIndex = rootPage.indexOf(
-    'id="myconference-visual-evidence"',
+  const workflowIndex = rootPage.indexOf('id="myconference-workflow"');
+  const safeguardsIndex = rootPage.indexOf('id="myconference-safeguards"');
+  const optimizationIndex = rootPage.indexOf(
+    'id="myconference-historical-optimization"',
   );
-  const academicIndex = rootPage.indexOf('class="academic-projects"');
-  const visualSection = rootPage.slice(visualSectionIndex, academicIndex);
+  const visualSection = rootPage.slice(workflowIndex, optimizationIndex);
 
-  assert.ok(visualSectionIndex > -1);
-  assert.ok(academicIndex > visualSectionIndex);
-  assert.match(visualSection, /MyConference: evidence visuals/);
+  assert.ok(workflowIndex > -1);
+  assert.ok(safeguardsIndex > workflowIndex);
+  assert.ok(optimizationIndex > safeguardsIndex);
   assert.match(visualSection, /Current Conference home at desktop width/);
   assert.match(visualSection, /Current Conference home at phone width/);
   assert.match(visualSection, /Tenant isolation, in layers/);

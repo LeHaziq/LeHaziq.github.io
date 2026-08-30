@@ -23,6 +23,11 @@ type EngineeringDecisionBlock = Extract<
 type MetricBlock = Extract<FeaturedBlock, { type: "metric" }>;
 type MediaBlock = Extract<FeaturedBlock, { type: "media" }>;
 type FeaturedAsset = FeaturedProject["assets"][number];
+type RenderedMediaEntry = {
+  block: MediaBlock;
+  asset: FeaturedAsset;
+  source: ImageMetadata;
+};
 type SafeguardDecision = {
   block: EngineeringDecisionBlock;
   evidence: Array<FeaturedEvidence | undefined>;
@@ -58,17 +63,6 @@ type RenderedFeaturedBlock =
       project: FeaturedProject;
       block: MetricBlock;
       evidence: FeaturedEvidence | undefined;
-    }
-  | {
-      type: "media";
-      project: FeaturedProject;
-      heading: string;
-      context: string;
-      entries: Array<{
-        block: MediaBlock;
-        asset: FeaturedAsset;
-        source: ImageMetadata;
-      }>;
     };
 
 const assetModules = import.meta.glob<{ default: ImageMetadata }>(
@@ -91,6 +85,7 @@ const technicalTextParts = (value: string) =>
     }));
 
 const renderedFeaturedBlocks: RenderedFeaturedBlock[] = [];
+const mediaEntriesByProject = new Map<string, RenderedMediaEntry[]>();
 for (const project of projects) {
   if (project.projectType !== "featured") {
     continue;
@@ -202,13 +197,7 @@ for (const project of projects) {
       return { block, asset, source };
     });
 
-    renderedFeaturedBlocks.push({
-      type: "media",
-      project,
-      heading: project.mediaSection.heading,
-      context: project.mediaSection.context,
-      entries,
-    });
+    mediaEntriesByProject.set(project.projectSlug, entries);
   }
 }
 const academicProjects = projects.filter(
@@ -273,23 +262,33 @@ const chronologyGroups = [
   <header class="site-header">
     <a class="site-name" href="/">Muhammad Haziq Aiman Anuar</a>
     <nav aria-label="Primary">
-      <a href="mailto:haziqaimanfb@gmail.com">Contact</a>
+      <a class="desktop-only" href="#myconference">MyConference</a>
+      <a href="#contact">Contact</a>
       <a href={resumePath} download>Resume</a>
     </nav>
   </header>
 
   <main id="main-content">
     <section class="introduction-section" aria-labelledby="introduction-heading">
-      <p class="eyebrow">Software engineer · Kuala Terengganu, Malaysia</p>
-      <h1 id="introduction-heading">Muhammad Haziq Aiman Anuar</h1>
-      <p class="introduction">
-        I build secure, production-oriented web systems, with applied AI and computer
-        vision as a second field of work.
-      </p>
-      <div class="actions">
-        <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Contact me</a>
-        <a href={resumePath} download>Download resume</a>
+      <div class="introduction-copy">
+        <p class="folio-line">Software engineer · Kuala Terengganu, Malaysia</p>
+        <h1 id="introduction-heading">Muhammad Haziq Aiman Anuar</h1>
+        <p class="introduction">
+          I build secure, production-oriented web systems, with applied AI and computer
+          vision as a second field of work.
+        </p>
+        <div class="actions">
+          <a class="primary-action" href="#myconference">View MyConference</a>
+          <a href={resumePath} download>Download resume</a>
+        </div>
       </div>
+      <aside class="introduction-acetate" aria-label="MyConference preview">
+        <p>Featured project</p>
+        <strong>MyConference</strong>
+        <span>Submit · assign · review · decide</span>
+        <a href="#myconference">Read the case study</a>
+      </aside>
+      <p class="working-note">Working note: ownership before implementation detail.</p>
     </section>
 
     {renderedFeaturedBlocks.map((pass) => pass.type === "narrative" ? (
@@ -327,16 +326,45 @@ const chronologyGroups = [
             <p>{pass.project.contextLabel}</p>
           </header>
 
-          <ol class="workflow-list">
-            {pass.evidence.map((record) => record && (
-              <li id={`${pass.project.projectSlug}-evidence-${record.id}`}>
-                <div>
-                  <h3>{record.publicCaption}</h3>
-                  <p>{record.publicClaim}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          <div class="workflow-record">
+            <ol class="workflow-list">
+              {pass.evidence.map((record) => record && (
+                <li id={`${pass.project.projectSlug}-evidence-${record.id}`}>
+                  <div>
+                    <h3>{record.publicCaption}</h3>
+                    <p>{record.publicClaim}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            <div
+              class="pass-media pass-media-workflow"
+              aria-label="MyConference workflow evidence"
+            >
+              {mediaEntriesByProject
+                .get(pass.project.projectSlug)
+                ?.filter((entry) => entry.block.presentation !== "supporting")
+                .map((entry) => (
+                  <figure
+                    class:list={[
+                      "evidence-visual",
+                      `evidence-visual-${entry.block.presentation}`,
+                    ]}
+                  >
+                    <Image
+                      src={entry.source}
+                      alt={entry.asset.alternativeText}
+                      widths={[390, 780, 1176, 1440]}
+                      sizes={entry.block.presentation === "lead" ? "(max-width: 72rem) 100vw, 50rem" : "(max-width: 44rem) 100vw, 24rem"}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <figcaption>{entry.asset.caption}</figcaption>
+                  </figure>
+                ))}
+            </div>
+          </div>
         </section>
       ) : pass.type === "safeguards" ? (
         <section
@@ -409,6 +437,35 @@ const chronologyGroups = [
                 {pass.attributions.map((attribution) => <p>{attribution}</p>)}
               </footer>
             )}
+
+            <div
+              class="pass-media pass-media-safeguards"
+              aria-label="MyConference safeguard evidence"
+            >
+              {mediaEntriesByProject
+                .get(pass.project.projectSlug)
+                ?.filter((entry) => entry.block.presentation === "supporting")
+                .map((entry) => (
+                  <figure class="evidence-visual evidence-visual-supporting">
+                    <Image
+                      src={entry.source}
+                      alt={entry.asset.alternativeText}
+                      sizes="(max-width: 72rem) 100vw, 50rem"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <figcaption>{entry.asset.caption}</figcaption>
+                  </figure>
+                ))}
+            </div>
+
+            <aside class="featured-project-close" aria-label="MyConference contact actions">
+              <p>Interested in the decisions behind this work?</p>
+              <div class="actions actions-on-cobalt">
+                <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Email me</a>
+                <a href={resumePath} download>Download resume</a>
+              </div>
+            </aside>
           </div>
         </section>
       ) : pass.type === "metric" ? (
@@ -434,43 +491,7 @@ const chronologyGroups = [
             </div>
           )}
         </section>
-      ) : (
-        <section
-          id={`${pass.project.projectSlug}-visual-evidence`}
-          class="featured-media-pass"
-          aria-labelledby={`${pass.project.projectSlug}-visual-evidence-heading`}
-        >
-          <header class="featured-pass-heading media-pass-heading">
-            <h2 id={`${pass.project.projectSlug}-visual-evidence-heading`}>
-              {pass.heading}
-            </h2>
-            <p>{pass.context}</p>
-          </header>
-
-          <div class="evidence-visuals">
-            {pass.entries.map((entry) => (
-              <figure
-                class:list={[
-                  "evidence-visual",
-                  `evidence-visual-${entry.block.presentation}`,
-                ]}
-              >
-                <Image
-                  src={entry.source}
-                  alt={entry.asset.alternativeText}
-                  widths={entry.asset.kind === "runtime-capture" ? [390, 780, 1176, 1440] : undefined}
-                  sizes={entry.block.presentation === "lead" ? "(max-width: 72rem) 100vw, 72rem" : "(max-width: 44rem) 100vw, 48rem"}
-                  loading="lazy"
-                  decoding="async"
-                />
-                <figcaption>
-                  <span>{entry.asset.caption}</span>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
-      ))}
+      ) : null)}
 
     {academicProjects.length > 0 && (
       <section class="academic-projects" aria-labelledby="academic-projects-heading">
@@ -542,5 +563,25 @@ const chronologyGroups = [
         ))}
       </div>
     </section>
+
+    <section id="contact" class="contact-close" aria-labelledby="contact-heading">
+      <p class="working-note">Working note: the next move is a conversation.</p>
+      <h2 id="contact-heading">Let's talk about the work.</h2>
+      <p>If this work is relevant to your team, email me.</p>
+      <div class="actions">
+        <a class="primary-action" href="mailto:haziqaimanfb@gmail.com">Email me</a>
+        <a href={resumePath} download>Download resume</a>
+      </div>
+    </section>
   </main>
+
+  <footer class="site-footer">
+    <p>Muhammad Haziq Aiman Anuar</p>
+    <nav aria-label="Footer">
+      <a href="mailto:haziqaimanfb@gmail.com">haziqaimanfb@gmail.com</a>
+      <a href="https://github.com/LeHaziq">GitHub</a>
+      <a href="https://www.linkedin.com/in/muhammad-haziq-aiman-anuar-5119b1261/">LinkedIn</a>
+      <a href={resumePath} download>Resume</a>
+    </nav>
+  </footer>
 </BaseLayout>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Muhammad Haziq Aiman Anuar</title>
+  <desc id="description">Branded cobalt and coated-white Portfolio card for Muhammad Haziq Aiman Anuar, software engineer.</desc>
+  <rect width="1200" height="630" fill="#123fc7" />
+  <path d="M68 52h1005l59 58v468H68z" fill="#f4f1e8" />
+  <path d="M1073 52v58h59" fill="none" stroke="#c7c2b4" stroke-width="2" />
+  <path d="M102 112h34v406h-34" fill="#123fc7" />
+  <text x="178" y="164" fill="#171916" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-weight="700" letter-spacing="2">PORTFOLIO · SOFTWARE ENGINEER</text>
+  <text x="178" y="288" fill="#171916" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700">Muhammad Haziq</text>
+  <text x="178" y="370" fill="#171916" font-family="Georgia, 'Times New Roman', serif" font-size="72" font-weight="700">Aiman Anuar</text>
+  <path d="M178 414h762" stroke="#171916" stroke-width="2" />
+  <text x="178" y="470" fill="#343731" font-family="Arial, Helvetica, sans-serif" font-size="28">Secure web systems · Applied AI · Computer vision</text>
+  <text x="178" y="522" fill="#343731" font-family="Arial, Helvetica, sans-serif" font-size="22">Kuala Terengganu, Malaysia</text>
+</svg>

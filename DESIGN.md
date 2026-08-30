@@ -1,129 +1,128 @@
 ---
-name: MyConference Media Evidence
-description: Presentation rules for the governed MyConference screenshots and tenant-isolation diagram.
+name: Margin of Record
+description: The production visual system for Muhammad Haziq Aiman Anuar's guided Portfolio manuscript.
 colors:
-  archive-stage: "#171717"
-  evidence-paper: "#f5f4ef"
-  stage-text: "#fff"
-  stage-muted: "#d7d5cd"
-  evidence-rule: "#b42318"
+  coated-paper: "#f4f1e8"
+  paper-depth: "#dfd9ca"
+  carbon-black: "#171916"
+  graphite-note: "#50544e"
+  manuscript-rule: "#aaa596"
+  cobalt-acetate: "#123fc7"
+  cobalt-depth: "#0d2e91"
+  cobalt-tint: "#dce5ff"
+  verification-red: "#b42318"
+  emboss-highlight: "rgb(255 255 255 / 0.7)"
+  emboss-shadow: "rgb(83 78 66 / 0.12)"
+  image-shadow: "rgb(0 0 0 / 0.2)"
 typography:
-  evidence-heading:
-    fontFamily: "Arial, Helvetica, sans-serif"
-    fontSize: "clamp(2rem, 5vw, 4rem)"
-    fontWeight: 700
-    lineHeight: 1
+  manuscript-display:
+    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontWeight: 650
+    fontSize: "clamp(2.55rem, 8vw, 6rem)"
+    lineHeight: 0.92
     letterSpacing: "-0.035em"
-  evidence-context:
-    fontFamily: "Arial, Helvetica, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 700
-    lineHeight: 1.55
-    letterSpacing: "0.04em"
-  evidence-caption:
-    fontFamily: "Arial, Helvetica, sans-serif"
-    fontSize: "0.875rem"
-    lineHeight: 1.5
+  section-heading:
+    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontWeight: 650
+    fontSize: "clamp(2.5rem, 5vw, 4.75rem)"
+    lineHeight: 0.95
+    letterSpacing: "-0.03em"
+  record-heading:
+    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontWeight: 650
+    fontSize: "clamp(1.35rem, 3.5vw, 3rem)"
+    lineHeight: 1.15
+    letterSpacing: "-0.025em"
+  evidence-prose:
+    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontWeight: 400
+    fontSize: "clamp(1.2rem, 2vw, 1.55rem)"
+    lineHeight: 1.48
+  interface:
+    fontFamily: "Public Sans Variable, Arial, Helvetica, sans-serif"
+    fontWeight: "400 800"
+    fontSize: "1rem"
+    lineHeight: 1.65
+  annotation:
+    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontWeight: 400
+    fontSize: "0.95rem"
+    lineHeight: 1.4
+  label:
+    fontFamily: "Public Sans Variable, Arial, Helvetica, sans-serif"
+    fontWeight: 800
+    fontSize: "0.7rem"
+    lineHeight: 1
+    letterSpacing: "0.07em"
 spacing:
-  stage-column-gap: "clamp(2rem, 7vw, 7rem)"
-  media-grid-gap: "clamp(2rem, 5vw, 4rem)"
-  caption-padding: "0.875rem 0 0"
+  sheet-gutter: "clamp(1.25rem, 5vw, 5rem)"
+  sheet-block: "clamp(3.5rem, 8vw, 7rem)"
+  manuscript-gap: "1rem"
+  record-gap: "clamp(2rem, 7vw, 7rem)"
 components:
-  media-stage:
-    backgroundColor: "{colors.archive-stage}"
-    textColor: "{colors.stage-text}"
-  evidence-caption:
-    textColor: "{colors.evidence-paper}"
-    typography: "{typography.evidence-caption}"
-    padding: "{spacing.caption-padding}"
+  manuscript-sheet:
+    backgroundColor: "{colors.coated-paper}"
+    textColor: "{colors.carbon-black}"
+    padding: "{spacing.sheet-block} {spacing.sheet-gutter}"
+  acetate-pass:
+    backgroundColor: "{colors.cobalt-acetate}"
+    textColor: "#fff"
+  verified-fact:
+    backgroundColor: "{colors.verification-red}"
+    textColor: "#fff"
+    typography: "{typography.label}"
+  working-note:
+    textColor: "{colors.graphite-note}"
+    typography: "{typography.annotation}"
 ---
 
-# Design System: MyConference Media Evidence
+# Design system: Margin of Record
 
-## Overview
+## Intent
 
-**Creative North Star: "The Archival Evidence Stage"**
+The Portfolio is one guided manuscript. Recruiters move from Haziq's introduction into MyConference evidence, then through the dated optimization, Academic projects, chronology, and contact actions. The page reads as a sequence of physical records on a cobalt work surface, not as a grid of interchangeable project cards.
 
-This document governs only the MyConference media-evidence group delivered for issue 20. It does not define the Portfolio's wider visual identity or future project media.
+The visual system uses six material roles from the approved direction:
 
-The dark, full-bleed stage separates governed artifacts from the surrounding case-study narrative. A recruiter should see the current product record first, then supporting responsive and architectural evidence. The presentation stays quiet so the artifacts carry the claim.
-
-**Key characteristics:**
-
-- One dominant record followed by supporting records.
-- Factual captions attached to every artifact.
-- Publication, provenance, and accessibility data resolved before display.
-
-## Colors
-
-### Primary
-
-- **Evidence rule:** Use the narrow red rule only to bind a caption to its artifact. It is an evidence marker, not decoration.
-
-### Neutral
-
-- **Archive stage:** Use the charcoal ground for the full media group.
-- **Stage text:** Use white for the main heading and paper white for captions.
-- **Stage context:** Use the muted warm gray for the short description beneath the heading.
-- **Artifact ground:** Give images a paper-colored fallback while they load.
-
-**The restrained-marker rule.** The red rule belongs above captions. Do not spread it across the stage as a general accent.
+- Coated paper carries the main document and quieter evidence.
+- Cobalt acetate marks MyConference ownership and safeguards.
+- Carbon black is the default reading color.
+- Verification red marks only the exact phrase `Verified fact`, evidence-caption rules, and critical focus annotations.
+- Graphite notes explain the manuscript's working structure. They never claim third-party review or public proof.
+- Blind embossing appears only as low-contrast paper depth. It never carries required information.
 
 ## Typography
 
-The media group keeps the Portfolio's Arial and Helvetica stack. Its heading is compact and forceful, while context and captions are small enough to remain secondary to the artifacts.
+Newsreader is the manuscript voice. It carries names, section headings, evidence prose, metrics, and working notes. Public Sans carries navigation, controls, technical labels, captions, and dense supporting prose. Both variable fonts are self-hosted from committed package versions; CSS imports only their upright weight axes.
 
-- **Evidence heading:** Limit the measure to about 11 characters so the title forms a short block beside the media.
-- **Evidence context:** Use the established small bold text beneath the heading.
-- **Evidence caption:** Use sentence case and a compact line height. Keep it factual rather than promotional.
+Georgia and Times New Roman form the Newsreader fallback chain. Arial and Helvetica form the Public Sans fallback chain. Copy remains available while fonts load, and neither fallback changes the content order.
 
-**The artifact-first rule.** Type identifies and explains the evidence. It must not compete with the image.
+Display text stops at 6rem and never tracks tighter than -0.035em. Evidence prose keeps a readable measure near 44rem. Labels use uppercase only where the manuscript needs indexing or verification language.
 
 ## Layout
 
-The stage runs edge to edge while its content aligns to the Portfolio's 72rem container. At wider widths, the stage uses a narrow heading column and a larger media column. The media column uses an asymmetric two-column grid. The first record spans both columns; supporting phone and architecture records sit beneath it.
+The page has a maximum 80rem manuscript width with a one-rem cobalt channel between sheets. Desktop records use a narrow annotation column beside the evidence column. At 52rem the sheets become one-column records. At 44rem the desktop-only MyConference header action disappears, facts move inline, and the normal document order remains unchanged.
 
-At 44rem and below, both grids become one column and the first record stops spanning columns. Keep phone captures centered and no wider than 24.375rem. Other records may use the available width.
+No section becomes sticky, hidden, tabbed, collapsed, or horizontally scrollable. The three MyConference passes remain separate headed sections. Approved desktop and phone captures sit inside the workflow pass; the tenant-isolation diagram sits inside safeguards and history.
 
-**The lead-record rule.** Assign the `lead` presentation to the strongest wide-format runtime record. Use `phone` for the constrained responsive capture and `supporting` for the remaining evidence; record order still controls reading order.
+## Sheets and acetate
 
-## Elevation & Depth
+Paper sheets use one ambient shadow and no border. Cobalt sections use folded-corner geometry to imply acetate without imitating a photograph. The introduction is one oversized sheet with a partial cobalt record that points into MyConference. The restrained embossed `PORTFOLIO / 2026` mark is decorative and sits outside the accessibility tree through CSS-generated content.
 
-The stage itself is flat. Images receive one ambient shadow (`0 0.75rem 2rem rgb(0 0 0 / 0.28)`) to separate pale interfaces and diagrams from the charcoal ground. Do not add shadows to captions or heading copy.
+The next issue may animate acetate progression. The issue 21 baseline remains complete and readable without JavaScript. Any later motion must preserve these static layouts and content boundaries.
 
-## Shapes
+## Evidence and media
 
-Evidence images keep square outer corners and their native aspect ratios. Do not crop them into cards, apply ornamental masks, or round their edges. The caption's straight red rule is the only framing device.
+Verified facts have one semantic copy. Their red stamp may rotate by one degree, but the claim text stays level and readable. Working notes use graphite or a tint of the surface they sit on. They must not use verification red or resemble an evidence stamp.
 
-## Components
+Each governed visual stays in a semantic figure with its approved alternative text and caption. Runtime captures retain responsive candidates and reserved dimensions. The phone capture remains narrower than the desktop record. The original tenant-isolation diagram is not cropped, rounded, or masked.
 
-### Evidence stage
+## Actions and browser surfaces
 
-Use a semantic section labelled by its visible heading. The heading states the project and evidence purpose; the short context line distinguishes current runtime captures from an authored architecture diagram.
+Actions are native links with at least 44 pixels of block-axis space. Primary actions use cobalt on paper and coated white on cobalt. Links open in the same tab. Resume links keep the native `download` behavior.
 
-### Evidence visual
+Keyboard focus uses a three-pixel verification-red outline because focus is a critical annotation. Selection uses the cobalt tint, and the scrollbar uses carbon black against paper depth. Reduced-motion preferences remove smooth scrolling even before the signature interaction exists.
 
-Each asset is one `figure` containing the image and its `figcaption`. The caption names what the artifact records. It must agree with the governed media block and asset record.
+## Social card
 
-Every displayed asset must have approved provenance and at least one supporting evidence reference. Runtime captures must pass the fictional-data check. Captions and alternative text describe only facts supported by those records.
-
-### Responsive image
-
-Load project assets through Astro image metadata so width and height remain intrinsic. Render at `width: 100%` and `height: auto`. Runtime captures provide responsive candidates at 390, 780, 1176, and 1440 pixels; the lead record advertises a 72rem display ceiling, while supporting records advertise a 48rem ceiling. Keep lazy loading and asynchronous decoding for this below-the-fold group.
-
-Alternative text must identify the interface or diagram and state the meaningful content visible in it. Do not use the caption as a substitute for alternative text. The architecture SVG also retains its own title, description, dimensions, and view box.
-
-## Do's and Don'ts
-
-### Do:
-
-- **Do** lead with the clearest wide-format runtime capture, then add phone and architecture evidence.
-- **Do** keep captions concise, literal, and synchronized with the governed content record.
-- **Do** preserve intrinsic dimensions, aspect ratio, semantic figures, and the section's visible accessible name.
-- **Do** verify publication approval, provenance, evidence references, and fictional data before a runtime capture appears.
-
-### Don't:
-
-- **Don't** use an asset whose visual claim exceeds its approved evidence.
-- **Don't** stretch, crop, round, or decorate evidence images.
-- **Don't** turn the archival stage or caption rule into a sitewide style without separate design authority.
+`public/social-card.svg` uses only name, role, location, and field labels from the approved Portfolio copy. It contains no project screenshot or hidden raster image. Metadata points to the stable custom-origin URL `https://haziqaiman.my/social-card.svg`.

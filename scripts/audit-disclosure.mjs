@@ -26,6 +26,7 @@ const governedAssetExtensions = new Set([
   ".svg",
   ".webp",
 ]);
+const allowedGeneratedBinaryExtensions = new Set([".woff2"]);
 const blockedAssetName =
   /(?:legacy|prototype|manuscript|rating|comparison|design-reference|current-proposed|screenshot)/i;
 const resumeName = "Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
@@ -180,8 +181,16 @@ for (const file of files) {
       normalizedPath.startsWith("dist/_astro/") &&
       approvedAssetStems.has(generatedAssetStem) &&
       generatedReferences.includes(originalFileName);
+    const approvedGeneratedFont =
+      normalizedPath.startsWith("dist/_astro/") &&
+      allowedGeneratedBinaryExtensions.has(extension) &&
+      generatedReferences.includes(originalFileName);
 
-    if (!approvedSourceAsset && !approvedGeneratedAsset) {
+    if (
+      !approvedSourceAsset &&
+      !approvedGeneratedAsset &&
+      !approvedGeneratedFont
+    ) {
       findings.push(`${projectPath}: unexpected binary file`);
     }
     continue;
