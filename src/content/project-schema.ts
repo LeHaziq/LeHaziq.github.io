@@ -155,7 +155,12 @@ const engineeringDecisionBlockSchema = z.object({
 
 const verifiedFactBlockSchema = z.object({
   type: z.literal("verified-fact"),
-  evidenceReferences,
+  evidenceReferences: z
+    .array(stableId)
+    .length(
+      1,
+      "Verified fact blocks reference exactly one evidence record",
+    ),
 });
 
 const metricBlockSchema = z.object({
@@ -235,6 +240,11 @@ const myConferenceProhibitedClaimPatterns = [
     ["github\\.com", "LeHaziq", "Conference-Management-System"].join("\\/"),
     "i",
   ),
+];
+
+const currentSuitePerformancePatterns = [
+  /\bcurrent(?:ly)?\b[\s\S]{0,50}\b(?:PHP )?test(?:-suite)?(?: run)?\b/i,
+  /\b(?:PHP )?(?:test(?:-suite)?(?: performance| run)?|suite)\b[\s\S]{0,40}\b(?:is\s+)?(?:current(?:ly)?|now|today|latest)\b/i,
 ];
 
 function featuredBlockPublicationText(
@@ -322,6 +332,30 @@ export const projectSchema = z
       context.addIssue({
         code: "custom",
         message: "Prohibited MyConference publication claim",
+      });
+    }
+
+    const metricText = [
+      ...project.evidence
+        .filter((evidence) => evidence.evidenceType === "measurement")
+        .map((evidence) => evidence.publicClaim),
+      ...(project.projectType === "featured"
+        ? project.blocks.flatMap((block) =>
+            block.type === "metric"
+              ? [block.comparison, block.unit, block.qualifier]
+              : [],
+          )
+        : []),
+    ].join("\n");
+    if (
+      currentSuitePerformancePatterns.some((pattern) =>
+        pattern.test(metricText),
+      )
+    ) {
+      context.addIssue({
+        code: "custom",
+        message:
+          "Historical MyConference metrics cannot claim current suite performance",
       });
     }
 
@@ -432,7 +466,19 @@ export function selectPublishedProjects(
     }
 
     if (entry.data.projectType === "featured") {
+      const verifiedFactClaims = new Set<string>();
+
       for (const block of entry.data.blocks) {
+        if (block.type === "verified-fact") {
+          const [evidenceId] = block.evidenceReferences;
+          if (verifiedFactClaims.has(evidenceId)) {
+            throw new Error(
+              `Project "${entry.data.projectSlug}" duplicates Verified fact claim "${evidenceId}"`,
+            );
+          }
+          verifiedFactClaims.add(evidenceId);
+        }
+
         if (block.type === "workflow") {
           for (const evidenceId of block.stepEvidenceReferences) {
             const evidence = evidenceById.get(evidenceId);

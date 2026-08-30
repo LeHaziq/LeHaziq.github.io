@@ -14,6 +14,22 @@ type FeaturedBlock = FeaturedProject["blocks"][number];
 type FeaturedEvidence = FeaturedProject["evidence"][number];
 type NarrativeBlock = Extract<FeaturedBlock, { type: "narrative" }>;
 type WorkflowBlock = Extract<FeaturedBlock, { type: "workflow" }>;
+type EngineeringDecisionBlock = Extract<
+  FeaturedBlock,
+  { type: "engineering-decision" }
+>;
+type MetricBlock = Extract<FeaturedBlock, { type: "metric" }>;
+type SafeguardDecision = {
+  block: EngineeringDecisionBlock;
+  evidence: Array<FeaturedEvidence | undefined>;
+};
+type SafeguardFact = {
+  evidence: FeaturedEvidence | undefined;
+};
+type SafeguardGroup = {
+  decision: SafeguardDecision | undefined;
+  facts: SafeguardFact[];
+};
 type RenderedFeaturedBlock =
   | {
       type: "narrative";
@@ -26,7 +42,26 @@ type RenderedFeaturedBlock =
       project: FeaturedProject;
       block: WorkflowBlock;
       evidence: Array<FeaturedEvidence | undefined>;
+    }
+  | {
+      type: "safeguards";
+      project: FeaturedProject;
+      groups: SafeguardGroup[];
+      attributions: string[];
+    }
+  | {
+      type: "metric";
+      project: FeaturedProject;
+      block: MetricBlock;
+      evidence: FeaturedEvidence | undefined;
     };
+
+const technicalTerms = new Set(["organisation_id", "404"]);
+const technicalTextParts = (value: string) =>
+  value
+    .split(/(organisation_id|404)/g)
+    .filter(Boolean)
+    .map((text) => ({ text, code: technicalTerms.has(text) }));
 
 const renderedFeaturedBlocks: RenderedFeaturedBlock[] = [];
 for (const project of projects) {
@@ -37,6 +72,8 @@ for (const project of projects) {
   const evidenceById = new Map(
     project.evidence.map((evidence) => [evidence.id, evidence]),
   );
+  const safeguardGroups: SafeguardGroup[] = [];
+  const metricBlocks: MetricBlock[] = [];
 
   for (const block of project.blocks) {
     if (block.type === "narrative") {
@@ -60,6 +97,60 @@ for (const project of projects) {
         ),
       });
     }
+
+    if (block.type === "engineering-decision") {
+      safeguardGroups.push({
+        decision: {
+          block,
+          evidence: block.evidenceReferences.map((evidenceId) =>
+            evidenceById.get(evidenceId),
+          ),
+        },
+        facts: [],
+      });
+    }
+
+    if (block.type === "verified-fact") {
+      const fact = {
+        evidence: evidenceById.get(block.evidenceReferences[0]),
+      };
+      const currentGroup = safeguardGroups.at(-1);
+      if (currentGroup) {
+        currentGroup.facts.push(fact);
+      } else {
+        safeguardGroups.push({ decision: undefined, facts: [fact] });
+      }
+    }
+
+    if (block.type === "metric") {
+      metricBlocks.push(block);
+    }
+  }
+
+  if (safeguardGroups.length > 0) {
+    const attributions = [
+      ...new Set(
+        safeguardGroups.flatMap((group) => [
+          ...(group.decision?.evidence ?? []),
+          ...group.facts.map((fact) => fact.evidence),
+        ]).flatMap((record) => (record ? [record.attribution] : [])),
+      ),
+    ];
+    renderedFeaturedBlocks.push({
+      type: "safeguards",
+      project,
+      groups: safeguardGroups,
+      attributions,
+    });
+  }
+
+  for (const block of metricBlocks) {
+    renderedFeaturedBlocks.push({
+      type: "metric",
+      project,
+      block,
+      evidence: evidenceById.get(block.evidenceReference),
+    });
   }
 }
 const academicProjects = projects.filter(
@@ -165,7 +256,7 @@ const chronologyGroups = [
             ))}
           </ol>
         </section>
-      ) : (
+      ) : pass.type === "workflow" ? (
         <section
           id={`${pass.project.projectSlug}-workflow`}
           class="featured-workflow-pass"
@@ -188,6 +279,102 @@ const chronologyGroups = [
               </li>
             ))}
           </ol>
+        </section>
+      ) : pass.type === "safeguards" ? (
+        <section
+          id={`${pass.project.projectSlug}-safeguards`}
+          class="featured-safeguards-pass"
+          aria-labelledby={`${pass.project.projectSlug}-safeguards-heading`}
+        >
+          <header class="featured-pass-heading safeguards-pass-heading">
+            <h2 id={`${pass.project.projectSlug}-safeguards-heading`}>
+              {pass.project.title}: safeguards and history
+            </h2>
+            <p>{pass.project.contextLabel}</p>
+          </header>
+
+          <div class="safeguards-record">
+            {pass.groups.map((group) => (
+              <div class="safeguard-group">
+                {group.decision && (
+                  <dl class="engineering-decision">
+                    <div>
+                      <dt>Situation</dt>
+                      <dd>
+                        {technicalTextParts(group.decision.block.situation).map((part) =>
+                          part.code ? <code>{part.text}</code> : part.text
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Choice</dt>
+                      <dd>
+                        {technicalTextParts(group.decision.block.choice).map((part) =>
+                          part.code ? <code>{part.text}</code> : part.text
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Rationale</dt>
+                      <dd>
+                        {technicalTextParts(group.decision.block.rationale).map((part) =>
+                          part.code ? <code>{part.text}</code> : part.text
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Result</dt>
+                      <dd>
+                        {technicalTextParts(group.decision.block.result).map((part) =>
+                          part.code ? <code>{part.text}</code> : part.text
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                )}
+
+                {group.facts.map((fact) => fact.evidence && (
+                  <div
+                    id={`${pass.project.projectSlug}-evidence-${fact.evidence.id}`}
+                    class="verified-fact"
+                  >
+                    <p class="verified-fact-label">Verified fact</p>
+                    <p>{fact.evidence.publicClaim}</p>
+                  </div>
+                ))}
+              </div>
+            ))}
+
+            {pass.attributions.length > 0 && (
+              <footer class="safeguards-attribution">
+                <h3>Attribution boundary</h3>
+                {pass.attributions.map((attribution) => <p>{attribution}</p>)}
+              </footer>
+            )}
+          </div>
+        </section>
+      ) : (
+        <section
+          id={`${pass.project.projectSlug}-historical-optimization`}
+          class="historical-optimization"
+          aria-labelledby={`${pass.project.projectSlug}-optimization-heading`}
+        >
+          <header class="section-heading optimization-heading">
+            <h2 id={`${pass.project.projectSlug}-optimization-heading`}>
+              Historical optimization
+            </h2>
+            <p>{pass.block.qualifier}</p>
+          </header>
+
+          {pass.evidence && (
+            <div class="historical-metric">
+              <p class="historical-metric-delta">{pass.evidence.publicCaption}</p>
+              <p class="historical-metric-claim">{pass.evidence.publicClaim}</p>
+              <p class="historical-metric-attribution">
+                {pass.evidence.attribution}
+              </p>
+            </div>
+          )}
         </section>
       ))}
 

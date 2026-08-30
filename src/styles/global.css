@@ -5,6 +5,10 @@
   color: #171717;
 }
 
+html {
+  container-type: inline-size;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -99,10 +103,12 @@ h1 {
 
 .featured-project-pass,
 .featured-workflow-pass,
+.featured-safeguards-pass,
+.historical-optimization,
 .academic-projects,
 .chronology {
-  margin-inline: calc(50% - 50vw);
-  padding-inline: max(1.25rem, calc((100vw - 72rem) / 2 + 1.25rem));
+  margin-inline: calc(50% - 50cqw);
+  padding-inline: max(1.25rem, calc((100cqw - 72rem) / 2 + 1.25rem));
 }
 
 .featured-workflow-pass {
@@ -235,6 +241,151 @@ h1 {
 .featured-evidence-list > li:nth-child(2) .featured-claim {
   font-size: clamp(1.25rem, 2.5vw, 1.75rem);
   line-height: 1.45;
+}
+
+.featured-safeguards-pass {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  background: #093fb4;
+  color: #fff;
+}
+
+.safeguards-pass-heading h2 {
+  max-width: 12ch;
+}
+
+.safeguards-record {
+  min-width: 0;
+  border-top: 0.125rem solid #fff;
+}
+
+.safeguard-group {
+  border-bottom: 0.125rem solid #fff;
+}
+
+.safeguard-group + .safeguard-group {
+  padding-top: clamp(0.5rem, 2vw, 1.25rem);
+}
+
+.engineering-decision {
+  margin: 0;
+  padding: clamp(1.5rem, 4vw, 2.75rem) 0;
+  border-bottom: 0.0625rem solid #7999df;
+}
+
+.engineering-decision > div {
+  display: grid;
+  grid-template-columns: minmax(6rem, 0.22fr) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.engineering-decision > div + div {
+  margin-top: 1rem;
+}
+
+.engineering-decision dt {
+  color: #dce6ff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.engineering-decision dd {
+  max-width: 46rem;
+  margin: 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.engineering-decision code {
+  color: inherit;
+  font-size: 0.95em;
+}
+
+.verified-fact {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.25fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 3vw, 2rem) 0;
+  border-bottom: 0.0625rem solid #7999df;
+}
+
+.safeguard-group > .verified-fact:last-child {
+  border-bottom: 0;
+}
+
+.verified-fact > p:last-child {
+  max-width: 46rem;
+  margin: 0;
+  font-size: clamp(1.0625rem, 2vw, 1.35rem);
+  line-height: 1.55;
+}
+
+.safeguards-attribution {
+  padding-top: clamp(1.5rem, 4vw, 2.75rem);
+}
+
+.safeguards-attribution h3 {
+  margin: 0;
+  color: #dce6ff;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.safeguards-attribution p {
+  max-width: 46rem;
+  margin: 0.75rem 0 0;
+  line-height: 1.6;
+}
+
+.historical-optimization {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  border-bottom: 0.125rem solid #171717;
+  background: #f5f4ef;
+}
+
+.optimization-heading h2 {
+  max-width: 11ch;
+}
+
+.historical-metric {
+  min-width: 0;
+  padding-top: clamp(1.25rem, 3vw, 2rem);
+  border-top: 0.125rem solid #171717;
+}
+
+.historical-metric-delta {
+  margin: 0;
+  color: #093fb4;
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.historical-metric-claim {
+  max-width: 46rem;
+  margin: 1.5rem 0 0;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+.historical-metric-attribution {
+  max-width: 46rem;
+  margin: 1rem 0 0;
+  color: #4c4c4c;
+  font-size: 0.875rem;
+  line-height: 1.6;
 }
 
 .academic-projects,
@@ -406,6 +557,19 @@ h1 {
   max-width: 44rem;
   margin: 1rem 0 0;
   line-height: 1.65;
+}
+
+@media (max-width: 44rem) {
+  .featured-safeguards-pass,
+  .historical-optimization {
+    grid-template-columns: 1fr;
+  }
+
+  .engineering-decision > div,
+  .verified-fact {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
 }
 
 @media (max-width: 34rem) {

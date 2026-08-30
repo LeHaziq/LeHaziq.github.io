@@ -186,6 +186,79 @@ test("the Portfolio publishes the complete MyConference workflow in document ord
   );
 });
 
+test("the Portfolio publishes MyConference safeguards and the dated optimization", async () => {
+  const rootPage = await readFile(generatedRootPage, "utf8");
+  const workflowIndex = rootPage.indexOf('id="myconference-workflow"');
+  const safeguardsIndex = rootPage.indexOf('id="myconference-safeguards"');
+  const optimizationIndex = rootPage.indexOf(
+    'id="myconference-historical-optimization"',
+  );
+  const academicIndex = rootPage.indexOf('class="academic-projects"');
+  const safeguardsPass = rootPage.slice(safeguardsIndex, optimizationIndex);
+  const optimizationPass = rootPage.slice(optimizationIndex, academicIndex);
+
+  assert.ok(safeguardsIndex > workflowIndex);
+  assert.ok(optimizationIndex > safeguardsIndex);
+  assert.ok(academicIndex > optimizationIndex);
+  assert.match(
+    safeguardsPass,
+    /<h2[^>]*>MyConference: safeguards and history<\/h2>/,
+  );
+
+  for (const requirement of [
+    /every tenant table carries <code>organisation_id<\/code>/i,
+    /composite Conference and Organisation keys/i,
+    /application scopes/i,
+    /forced PostgreSQL row-level security/i,
+    /missing Organisation context returns no tenant rows/i,
+    /cross-tenant requests return <code>404<\/code>/i,
+    /Organisation ownership does not grant confidential access/i,
+    /audited Conference Chair Role Assignment/i,
+    /Decision corrections add new Decision rows/i,
+    /revoked role assignments preserve their original rows/i,
+    /audit events cannot be updated or deleted/i,
+  ]) {
+    assert.match(safeguardsPass, requirement);
+  }
+
+  assert.equal(
+    [...safeguardsPass.matchAll(/class="engineering-decision"/g)].length,
+    3,
+  );
+  for (const label of ["Situation", "Choice", "Rationale", "Result"]) {
+    assert.equal(
+      [...safeguardsPass.matchAll(new RegExp(`<dt>${label}<\\/dt>`, "g"))]
+        .length,
+      3,
+    );
+  }
+  assert.equal(
+    [...safeguardsPass.matchAll(/class="verified-fact"/g)].length,
+    5,
+  );
+  assert.match(
+    safeguardsPass,
+    /I inherited an earlier prototype and led the current Laravel-based MyConference rebuild\. I made the final product and engineering decisions while using AI-assisted development tools\./,
+  );
+
+  assert.match(optimizationPass, /<h2[^>]*>Historical optimization<\/h2>/);
+  assert.match(optimizationPass, /Measured on 29 August 2026/);
+  assert.match(optimizationPass, /1,013 seconds to 664 seconds/);
+  assert.match(optimizationPass, /34\.5% lower/);
+  assert.match(
+    optimizationPass,
+    /Reduced MyConference(?:'|&#39;)s passing serial PHP test run from 1,013 seconds to 664 seconds by matching database reset strategies to test behavior, while retaining migration-backed checks for schema and privilege changes\./,
+  );
+  assert.match(optimizationPass, /fresh migrations[^<]*120[^<]*14/i);
+  assert.match(optimizationPass, /tests[^<]*1,218[^<]*1,147/i);
+  assert.match(optimizationPass, /assertions[^<]*11,081[^<]*10,986/i);
+  assert.match(optimizationPass, /both comparison runs passed/i);
+  assert.doesNotMatch(
+    `${safeguardsPass}${optimizationPass}`,
+    /<script\b|<button\b|<details\b|role="tab"|aria-expanded=/i,
+  );
+});
+
 test("the project schema rejects prohibited MyConference publication claims", () => {
   const privateSourceUrl = [
     "https://github.com",
@@ -274,6 +347,44 @@ test("the project schema rejects prohibited MyConference publication claims", ()
     validationMessages(projectSchema.safeParse(projectWithPilotLink)),
     /Prohibited MyConference publication claim/,
   );
+});
+
+test("the project schema rejects current-performance language for historical metrics", () => {
+  for (const publicClaim of [
+    "MyConference's current passing PHP test run takes 664 seconds.",
+    "PHP test-suite performance is now 664 seconds.",
+    "The suite currently runs in 664 seconds.",
+  ]) {
+    const project = {
+      ...academicProject(),
+      projectSlug: "myconference",
+      projectType: "featured",
+      evidence: [
+        {
+          ...academicProject().evidence[0],
+          evidenceType: "measurement",
+          publicClaim,
+          qualifier: "Measured on 29 August 2026",
+        },
+      ],
+      blocks: [
+        {
+          type: "metric",
+          comparison: "1,013 seconds to 664 seconds",
+          unit: "seconds",
+          qualifier: "Measured on 29 August 2026",
+          evidenceReference: "fixture-evidence",
+        },
+      ],
+    };
+    delete project.academic;
+
+    assert.match(
+      validationMessages(projectSchema.safeParse(project)),
+      /Historical MyConference metrics cannot claim current suite performance/,
+      publicClaim,
+    );
+  }
 });
 
 test("the generated Portfolio omits prohibited MyConference claims", async () => {
@@ -472,6 +583,32 @@ test("Featured narrative blocks keep public claims in evidence records", () => {
   assert.match(validationMessages(result), /Unrecognized key.*body/);
 });
 
+test("Verified fact blocks contain one semantic claim", () => {
+  const result = featuredBlockSchema.safeParse({
+    type: "verified-fact",
+    evidenceReferences: ["first-claim", "second-claim"],
+  });
+
+  assert.match(
+    validationMessages(result),
+    /Verified fact blocks reference exactly one evidence record/,
+  );
+});
+
+test("metric blocks reject a missing historical qualifier", () => {
+  const result = featuredBlockSchema.safeParse({
+    type: "metric",
+    comparison: "1,013 seconds to 664 seconds",
+    unit: "seconds",
+    evidenceReference: "historical-measurement",
+  });
+
+  assert.match(
+    validationMessages(result),
+    /Metric date or snapshot qualifier is required|expected string/i,
+  );
+});
+
 test("the project schema rejects unknown Featured project blocks", () => {
   const project = {
     ...academicProject(),
@@ -583,6 +720,57 @@ test("project publication rejects missing evidence references", () => {
   assert.throws(
     () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
     /references missing evidence "missing-evidence"/,
+  );
+});
+
+test("project publication rejects unresolved Verified facts and metrics", () => {
+  for (const block of [
+    {
+      type: "verified-fact",
+      evidenceReferences: ["missing-evidence"],
+    },
+    {
+      type: "metric",
+      comparison: "1,013 seconds to 664 seconds",
+      unit: "seconds",
+      qualifier: "Measured on 29 August 2026",
+      evidenceReference: "missing-evidence",
+    },
+  ]) {
+    const project = projectSchema.parse({
+      ...academicProject(),
+      projectType: "featured",
+      blocks: [block],
+      academic: undefined,
+    });
+
+    assert.throws(
+      () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
+      /references missing evidence "missing-evidence"/,
+    );
+  }
+});
+
+test("project publication rejects duplicated Verified fact claims", () => {
+  const project = projectSchema.parse({
+    ...academicProject(),
+    projectType: "featured",
+    blocks: [
+      {
+        type: "verified-fact",
+        evidenceReferences: ["fixture-evidence"],
+      },
+      {
+        type: "verified-fact",
+        evidenceReferences: ["fixture-evidence"],
+      },
+    ],
+    academic: undefined,
+  });
+
+  assert.throws(
+    () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
+    /duplicates Verified fact claim "fixture-evidence"/,
   );
 });
 

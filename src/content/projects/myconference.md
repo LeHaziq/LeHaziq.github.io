@@ -125,6 +125,56 @@ evidence:
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
     publicationApproved: true
     qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: tenant-isolation
+    publicationStatus: published
+    publicClaim: Every tenant table carries organisation_id; composite Conference and Organisation keys prevent mismatches; application scopes enforce the application boundary; forced PostgreSQL row-level security protects raw queries; missing Organisation context returns no tenant rows; and cross-tenant requests return 404.
+    evidenceType: repository
+    provenance: Approved source, architecture, policy, and tenancy-test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: confidential-access
+    publicationStatus: published
+    publicClaim: Organisation ownership does not grant confidential access; an audited Conference Chair Role Assignment does.
+    evidenceType: repository
+    provenance: Approved role, policy, and confidential-access test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: decision-corrections
+    publicationStatus: published
+    publicClaim: Decision corrections add new Decision rows.
+    evidenceType: repository
+    provenance: Approved decision-history source and test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: revoked-role-assignments
+    publicationStatus: published
+    publicClaim: Revoked role assignments preserve their original rows.
+    evidenceType: repository
+    provenance: Approved role-assignment history source and test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: immutable-audit-events
+    publicationStatus: published
+    publicClaim: Audit events cannot be updated or deleted.
+    evidenceType: repository
+    provenance: Approved audit-event source, database, and test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: historical-test-optimization
+    publicationStatus: published
+    publicClaim: >-
+      Reduced MyConference's passing serial PHP test run from 1,013 seconds to 664 seconds by matching database reset strategies to test behavior, while retaining migration-backed checks for schema and privilege changes. Both comparison runs passed; fresh migrations fell from 120 to 14, tests changed from 1,218 to 1,147 after duplicate removal, and assertions changed from 11,081 to 10,986 after duplicate removal.
+    publicCaption: 34.5% lower
+    evidenceType: measurement
+    provenance: Approved dated serial PHP test-suite comparison
+    attribution: MyConference PHP test-suite optimization led by Muhammad Haziq Aiman Anuar within the current Laravel rebuild.
+    publicationApproved: true
+    qualifier: Measured on 29 August 2026
 assets: []
 blocks:
   - type: narrative
@@ -145,6 +195,49 @@ blocks:
       - workflow-decision
       - workflow-revision
       - workflow-camera-ready-upload
+  - type: engineering-decision
+    situation: Tenant data had to remain isolated across application and database access paths.
+    choice: Every tenant table carries organisation_id; composite Conference and Organisation keys prevent mismatches; application scopes enforce the application boundary; and forced PostgreSQL row-level security protects raw queries.
+    rationale: The application and database boundaries cover different access paths.
+    result: Missing Organisation context returns no tenant rows, and cross-tenant requests return 404.
+    evidenceReferences:
+      - tenant-isolation
+  - type: verified-fact
+    evidenceReferences:
+      - tenant-isolation
+  - type: engineering-decision
+    situation: Organisation ownership and access to confidential Conference material are separate responsibilities.
+    choice: Organisation ownership does not grant confidential access. An audited Conference Chair Role Assignment grants it.
+    rationale: Conference-scoped assignments keep privileged access explicit and reviewable.
+    result: Confidential access follows the audited role assignment, not tenant ownership.
+    evidenceReferences:
+      - confidential-access
+  - type: verified-fact
+    evidenceReferences:
+      - confidential-access
+  - type: engineering-decision
+    situation: Operational corrections and revocations had to preserve the earlier record.
+    choice: Decision corrections add new Decision rows, revoked role assignments preserve their original rows, and audit events cannot be updated or deleted.
+    rationale: Append-only history keeps the sequence of actions available for audit.
+    result: The current state can change without erasing the earlier decision, assignment, or event.
+    evidenceReferences:
+      - decision-corrections
+      - revoked-role-assignments
+      - immutable-audit-events
+  - type: verified-fact
+    evidenceReferences:
+      - decision-corrections
+  - type: verified-fact
+    evidenceReferences:
+      - revoked-role-assignments
+  - type: verified-fact
+    evidenceReferences:
+      - immutable-audit-events
+  - type: metric
+    comparison: 1,013 seconds to 664 seconds
+    unit: seconds
+    qualifier: Measured on 29 August 2026
+    evidenceReference: historical-test-optimization
 ---
 
-This readable record is the complete source for the first two MyConference evidence passes.
+This readable record is the complete source for all three MyConference evidence passes and the historical optimization.
