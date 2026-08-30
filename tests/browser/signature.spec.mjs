@@ -1,14 +1,18 @@
 import { expect, test } from "@playwright/test";
+import { installSignatureTimingCollector } from "./support/signature-timing.mjs";
 
 const storageKey = "portfolio:myconference-signature:v1";
 
 test("scrolling reveals each pass once in order within its motion budget", async ({
   page,
 }) => {
+  await page.addInitScript(
+    installSignatureTimingCollector,
+    "signatureAnimationTimings",
+  );
   await page.addInitScript(() => {
     window.signatureEvidence = {
       completions: [],
-      animations: [],
     };
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -31,15 +35,6 @@ test("scrolling reveals each pass once in order within its motion budget", async
       );
     });
 
-    document.addEventListener("animationend", (event) => {
-      if (!event.animationName.startsWith("signature-")) {
-        return;
-      }
-      window.signatureEvidence.animations.push({
-        name: event.animationName,
-        elapsedMilliseconds: event.elapsedTime * 1000,
-      });
-    });
   });
 
   await page.goto("/");
@@ -55,12 +50,15 @@ test("scrolling reveals each pass once in order within its motion budget", async
   }
 
   const evidence = await page.evaluate(() => window.signatureEvidence);
+  const animationTimings = await page.evaluate(
+    () => window.signatureAnimationTimings,
+  );
   expect(evidence.completions).toEqual([0, 1, 2]);
 
-  const peelTimings = evidence.animations
+  const peelTimings = animationTimings
     .filter(({ name }) => name === "signature-acetate-peel")
     .map(({ elapsedMilliseconds }) => elapsedMilliseconds);
-  const stampTimings = evidence.animations
+  const stampTimings = animationTimings
     .filter(({ name }) => name === "signature-fact-stamp")
     .map(({ elapsedMilliseconds }) => elapsedMilliseconds);
 
@@ -78,7 +76,7 @@ test("scrolling reveals each pass once in order within its motion budget", async
   await expect(passes.nth(1)).toHaveAttribute("data-signature-state", "complete");
   await expect(passes.nth(2)).toHaveAttribute("data-signature-state", "complete");
   expect(
-    await page.evaluate(() => window.signatureEvidence.animations),
+    await page.evaluate(() => window.signatureAnimationTimings),
   ).toHaveLength(0);
 
   await page.mouse.wheel(0, -900);

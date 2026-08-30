@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { mkdir, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
+import { installSignatureTimingCollector } from "./support/signature-timing.mjs";
 
 const shouldCapture = process.env.RETAIN_CAPTURE === "1";
 const artifactDirectory = fileURLToPath(
@@ -55,17 +56,10 @@ test("retains the signature interaction screen capture", async ({ browser }) => 
   });
   const page = await context.newPage();
   const video = page.video();
-  await page.addInitScript(() => {
-    window.captureTimingEvidence = [];
-    document.addEventListener("animationend", (event) => {
-      if (event.animationName.startsWith("signature-")) {
-        window.captureTimingEvidence.push({
-          duration: event.elapsedTime * 1000,
-          name: event.animationName,
-        });
-      }
-    });
-  });
+  await page.addInitScript(
+    installSignatureTimingCollector,
+    "captureTimingEvidence",
+  );
 
   await page.goto("/");
   await page.waitForTimeout(500);
@@ -74,12 +68,12 @@ test("retains the signature interaction screen capture", async ({ browser }) => 
   const maximumPeel = Math.max(
     ...timingEvidence
       .filter(({ name }) => name === "signature-acetate-peel")
-      .map(({ duration }) => duration),
+      .map(({ elapsedMilliseconds }) => elapsedMilliseconds),
   );
   const maximumStamp = Math.max(
     ...timingEvidence
       .filter(({ name }) => name === "signature-fact-stamp")
-      .map(({ duration }) => duration),
+      .map(({ elapsedMilliseconds }) => elapsedMilliseconds),
   );
   expect(maximumPeel).toBeLessThanOrEqual(500);
   expect(maximumStamp).toBeLessThanOrEqual(150);
