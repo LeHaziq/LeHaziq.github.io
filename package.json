@@ -10,11 +10,13 @@
     "check": "astro check",
     "dev": "astro dev",
     "test": "npm run build && npm run test:foundation && npm run test:browser && npm run audit",
+    "test:accessibility": "playwright test tests/browser/accessibility.spec.mjs",
     "test:browser": "playwright test",
     "test:foundation": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
     "@fontsource-variable/newsreader": "5.3.0",
     "@fontsource-variable/public-sans": "5.3.0",
     "@playwright/test": "1.62.1",

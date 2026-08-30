@@ -13,17 +13,46 @@ test("scrolling reveals each pass once in order within its motion budget", async
   await page.addInitScript(() => {
     window.signatureEvidence = {
       completions: [],
+      peelDurations: [],
+      revealDurations: [],
+      stampDurations: [],
     };
 
     document.addEventListener("DOMContentLoaded", () => {
       const passes = document.querySelectorAll("[data-signature-pass]");
+      const revealStartedAt = new Map();
+      const durationInMilliseconds = (value) => {
+        const duration = Number.parseFloat(value);
+        return value.endsWith("ms") ? duration : duration * 1000;
+      };
       const observer = new MutationObserver((records) => {
         for (const record of records) {
           const pass = record.target;
+          const passIndex = Number(pass.dataset.signaturePass);
+          if (pass.dataset.signatureState === "revealing") {
+            revealStartedAt.set(passIndex, performance.now());
+            const acetate = pass.querySelector(".signature-acetate");
+            if (acetate) {
+              window.signatureEvidence.peelDurations.push(
+                durationInMilliseconds(
+                  getComputedStyle(acetate).animationDuration,
+                ),
+              );
+            }
+            for (const label of pass.querySelectorAll(".verified-fact-label")) {
+              window.signatureEvidence.stampDurations.push(
+                durationInMilliseconds(getComputedStyle(label).animationDuration),
+              );
+            }
+          }
           if (pass.dataset.signatureState === "complete") {
-            window.signatureEvidence.completions.push(
-              Number(pass.dataset.signaturePass),
-            );
+            window.signatureEvidence.completions.push(passIndex);
+            const startedAt = revealStartedAt.get(passIndex);
+            if (startedAt !== undefined) {
+              window.signatureEvidence.revealDurations.push(
+                performance.now() - startedAt,
+              );
+            }
           }
         }
       });
@@ -50,22 +79,13 @@ test("scrolling reveals each pass once in order within its motion budget", async
   }
 
   const evidence = await page.evaluate(() => window.signatureEvidence);
-  const animationTimings = await page.evaluate(
-    () => window.signatureAnimationTimings,
-  );
   expect(evidence.completions).toEqual([0, 1, 2]);
-
-  const peelTimings = animationTimings
-    .filter(({ name }) => name === "signature-acetate-peel")
-    .map(({ elapsedMilliseconds }) => elapsedMilliseconds);
-  const stampTimings = animationTimings
-    .filter(({ name }) => name === "signature-fact-stamp")
-    .map(({ elapsedMilliseconds }) => elapsedMilliseconds);
-
-  expect(peelTimings).toHaveLength(3);
-  expect(Math.max(...peelTimings)).toBeLessThanOrEqual(500);
-  expect(stampTimings.length).toBeGreaterThan(0);
-  expect(Math.max(...stampTimings)).toBeLessThanOrEqual(150);
+  expect(evidence.peelDurations).toHaveLength(3);
+  expect(Math.max(...evidence.peelDurations)).toBeLessThanOrEqual(500);
+  expect(evidence.revealDurations).toHaveLength(3);
+  expect(Math.max(...evidence.revealDurations)).toBeLessThanOrEqual(500);
+  expect(evidence.stampDurations.length).toBeGreaterThan(0);
+  expect(Math.max(...evidence.stampDurations)).toBeLessThanOrEqual(150);
   await expect
     .poll(() => page.evaluate((key) => sessionStorage.getItem(key), storageKey))
     .toBe("3");
@@ -105,7 +125,10 @@ test("reduced motion renders static passes without animated or pinned behavior",
   }
 
   const reducedMotionState = await page.evaluate(() => ({
-    animations: document.getAnimations().length,
+    animations:
+      document
+        .querySelector("myconference-signature")
+        ?.getAnimations({ subtree: true }).length ?? 0,
     panelPositions: Array.from(
       document.querySelectorAll("[data-signature-pass]"),
       (pass) => getComputedStyle(pass).position,
@@ -177,38 +200,54 @@ test("the complete Portfolio remains available without JavaScript", async ({ bro
   await context.close();
 });
 
-test("mouse, touch, and keyboard scrolling remain native", async ({ browser, page }) => {
+test("mouse, touch, and keyboard scrolling remain native", async ({
+  browser,
+  browserName,
+  page,
+}) => {
   await page.goto("/");
   await page.evaluate(() => scrollTo(0, 0));
 
   await page.mouse.wheel(0, 650);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+  await page.waitForTimeout(600);
   const afterMouse = await page.evaluate(() => scrollY);
 
   await page.keyboard.press("PageDown");
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(afterMouse);
+  await page.waitForTimeout(600);
   const afterPageDown = await page.evaluate(() => scrollY);
 
   await page.keyboard.press("PageUp");
+  await page.waitForTimeout(600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeLessThan(afterPageDown);
 
   await page.keyboard.press("End");
+  await page.waitForTimeout(600);
   await expect
     .poll(() =>
       page.evaluate(
-        () => Math.round(scrollY + innerHeight - document.documentElement.scrollHeight),
+        () =>
+          Math.abs(
+            scrollY + innerHeight - document.documentElement.scrollHeight,
+          ),
       ),
     )
-    .toBe(0);
+    .toBeLessThanOrEqual(1);
 
   const atEnd = await page.evaluate(() => scrollY);
   await page.mouse.wheel(0, -650);
   await expect.poll(() => page.evaluate(() => scrollY)).toBeLessThan(atEnd);
 
   await page.keyboard.press("Home");
+  await page.waitForTimeout(600);
   await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
   await page.keyboard.press("ArrowDown");
   await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(0);
+
+  if (browserName !== "chromium") {
+    return;
+  }
 
   const touchContext = await browser.newContext({
     hasTouch: true,

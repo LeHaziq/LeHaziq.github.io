@@ -57,7 +57,6 @@
 }
 
 html {
-  min-width: 20rem;
   scroll-behavior: smooth;
   scrollbar-color: var(--ink) var(--paper-deep);
 }
@@ -68,8 +67,7 @@ html {
 
 body {
   margin: 0;
-  min-width: 20rem;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: var(--cobalt);
 }
 
@@ -91,6 +89,7 @@ a:hover {
 a:focus-visible {
   outline: 0.1875rem solid var(--verification);
   outline-offset: 0.1875rem;
+  box-shadow: 0 0 0 0.5625rem var(--paper);
 }
 
 .skip-link {
@@ -98,6 +97,9 @@ a:focus-visible {
   z-index: 20;
   top: 0.75rem;
   left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   padding: 0.75rem 1rem;
   background: var(--ink);
   color: var(--paper);
@@ -146,6 +148,19 @@ h2,
   gap: 0.5rem 1.25rem;
 }
 
+.site-header > *,
+.site-footer > *,
+.introduction-section > *,
+.featured-project-pass > *,
+.featured-workflow-pass > *,
+.featured-safeguards-pass > *,
+.historical-optimization > *,
+.academic-projects > *,
+.chronology > *,
+.contact-close > * {
+  min-width: 0;
+}
+
 .site-header nav a,
 .site-footer nav a,
 .actions a {
@@ -155,7 +170,10 @@ h2,
 }
 
 .site-name {
+  display: inline-flex;
+  align-items: center;
   max-width: 28ch;
+  min-height: 2.75rem;
   color: inherit;
   font-weight: 750;
   text-decoration: none;
@@ -275,7 +293,7 @@ h1 {
   position: absolute;
   z-index: 3;
   right: clamp(1.25rem, 4vw, 3rem);
-  bottom: clamp(1.25rem, 3vw, 2.5rem);
+  bottom: 0.75rem;
   max-width: 20rem;
   margin: 0;
   color: var(--cobalt-light);
@@ -324,8 +342,9 @@ myconference-signature {
 }
 
 [data-signature-pass] {
+  contain: paint;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
 }
 
 [data-signature-pass] > :not(.signature-acetate) {
@@ -943,6 +962,7 @@ myconference-signature[data-motion="standard"]
 
   .site-header {
     align-items: flex-start;
+    flex-wrap: wrap;
     padding: 0.9rem 1rem;
   }
 
@@ -956,6 +976,22 @@ myconference-signature[data-motion="standard"]
 
   .site-name {
     max-width: 14ch;
+  }
+
+  .site-name,
+  h1,
+  h2,
+  h3,
+  h4,
+  p,
+  dt,
+  dd,
+  li,
+  figcaption,
+  code,
+  a,
+  strong {
+    overflow-wrap: anywhere;
   }
 
   h1 {
@@ -999,15 +1035,6 @@ myconference-signature[data-motion="standard"]
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
   }
 }
 

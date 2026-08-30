@@ -12,12 +12,29 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "android-chrome-emulation",
+      testMatch: "**/accessibility.spec.mjs",
+      use: { ...devices["Pixel 7"], channel: "chrome" },
+    },
+    {
+      name: "iphone-webkit-emulation",
+      testMatch: "**/accessibility.spec.mjs",
+      use: { ...devices["iPhone 15"] },
     },
   ],
   webServer: {
-    command:
-      "npm run dev -- --host 127.0.0.1 --port 4173 --ignore-lock",
+    command: "npm run dev -- --host 127.0.0.1 --port 4173",
     url: "http://127.0.0.1:4173",
     reuseExistingServer: true,
   },
