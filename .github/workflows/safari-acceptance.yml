@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload Safari evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: safari-acceptance-${{ matrix.motion }}
           path: |
