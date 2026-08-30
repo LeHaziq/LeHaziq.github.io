@@ -1,77 +1,184 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+const publicPages = [
+  { label: "Portfolio", path: "/" },
+  { label: "404", path: "/404.html" },
+];
 const publicActions =
   "body > .skip-link, body > .site-header a, body > main a, body > .site-footer a";
+const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 
-for (const reducedMotion of [false, true]) {
-  test(`the ${reducedMotion ? "reduced-motion" : "normal-motion"} state has no automated WCAG 2.2 AA violations`, async ({
-    page,
-  }) => {
-    await page.emulateMedia({
-      reducedMotion: reducedMotion ? "reduce" : "no-preference",
+async function revealSignaturePasses(page) {
+  for (const selector of [
+    "#myconference",
+    "#myconference-workflow",
+    "#myconference-safeguards",
+  ]) {
+    await page.locator(selector).scrollIntoViewIfNeeded();
+    await expect(page.locator(selector)).toHaveAttribute(
+      "data-signature-state",
+      "complete",
+    );
+  }
+}
+
+async function inspectLayout(page) {
+  return page.evaluate(() => {
+    const isVisible = (element) => {
+      const styles = getComputedStyle(element);
+      const bounds = element.getBoundingClientRect();
+      return (
+        styles.display !== "none" &&
+        styles.visibility !== "hidden" &&
+        bounds.width > 0 &&
+        bounds.height > 0
+      );
+    };
+    const textElements = Array.from(
+      document.querySelectorAll("h1, h2, h3, h4, p, dt, dd, figcaption, a"),
+    ).filter(
+      (element) => isVisible(element) && !element.matches(".skip-link"),
+    );
+    const clippedText = textElements.flatMap((element) => {
+      const elementBounds = element.getBoundingClientRect();
+      let ancestor = element.parentElement;
+      while (ancestor) {
+        const styles = getComputedStyle(ancestor);
+        if (
+          [styles.overflowX, styles.overflowY].some((value) =>
+            ["clip", "hidden"].includes(value),
+          )
+        ) {
+          const ancestorBounds = ancestor.getBoundingClientRect();
+          if (
+            elementBounds.left < ancestorBounds.left - 1 ||
+            elementBounds.right > ancestorBounds.right + 1 ||
+            elementBounds.top < ancestorBounds.top - 1 ||
+            elementBounds.bottom > ancestorBounds.bottom + 1
+          ) {
+            return [element.textContent?.trim().slice(0, 80)];
+          }
+        }
+        ancestor = ancestor.parentElement;
+      }
+      return [];
     });
-    await page.goto("/");
+    const overlappingText = [];
 
-    if (!reducedMotion) {
-      for (const selector of [
-        "#myconference",
-        "#myconference-workflow",
-        "#myconference-safeguards",
-      ]) {
-        await page.locator(selector).scrollIntoViewIfNeeded();
-        await expect(page.locator(selector)).toHaveAttribute(
-          "data-signature-state",
-          "complete",
-        );
+    for (let firstIndex = 0; firstIndex < textElements.length; firstIndex += 1) {
+      const firstElement = textElements[firstIndex];
+      const firstBounds = firstElement.getBoundingClientRect();
+      for (
+        let secondIndex = firstIndex + 1;
+        secondIndex < textElements.length;
+        secondIndex += 1
+      ) {
+        const secondElement = textElements[secondIndex];
+        if (
+          firstElement.contains(secondElement) ||
+          secondElement.contains(firstElement)
+        ) {
+          continue;
+        }
+        const secondBounds = secondElement.getBoundingClientRect();
+        const overlapWidth =
+          Math.min(firstBounds.right, secondBounds.right) -
+          Math.max(firstBounds.left, secondBounds.left);
+        const overlapHeight =
+          Math.min(firstBounds.bottom, secondBounds.bottom) -
+          Math.max(firstBounds.top, secondBounds.top);
+        if (overlapWidth > 1 && overlapHeight > 1) {
+          overlappingText.push([
+            firstElement.textContent?.trim().slice(0, 60),
+            secondElement.textContent?.trim().slice(0, 60),
+          ]);
+        }
       }
     }
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-      .analyze();
-    const violations = results.violations.map((violation) => ({
-      id: violation.id,
-      impact: violation.impact,
-      targets: violation.nodes.map((node) => node.target),
-    }));
+    const viewportWidth = document.documentElement.clientWidth;
+    const inaccessibleActions = Array.from(
+      document.querySelectorAll("main a, body > .site-header a, body > .site-footer a"),
+    )
+      .filter(isVisible)
+      .flatMap((action) => {
+        const bounds = action.getBoundingClientRect();
+        return bounds.left < 0 || bounds.right > viewportWidth
+          ? [action.textContent?.trim()]
+          : [];
+      });
 
-    expect(violations).toEqual([]);
+    return {
+      clippedText,
+      inaccessibleActions,
+      overlappingText,
+      horizontalOverflow:
+        document.documentElement.scrollWidth -
+        document.documentElement.clientWidth,
+    };
   });
 }
 
-test("the Portfolio reflows without horizontal scrolling at 320 CSS pixels", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto("/");
-
-  const layout = await page.evaluate(() => ({
-    clientWidth: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
-
-  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
+async function expectSoundLayout(page) {
+  expect(await inspectLayout(page)).toEqual({
+    clippedText: [],
+    inaccessibleActions: [],
+    overlappingText: [],
+    horizontalOverflow: 0,
+  });
   await page.evaluate(() => window.scrollTo(100, 0));
   expect(await page.evaluate(() => window.scrollX)).toBe(0);
-});
+}
 
-test("portrait and landscape layouts keep every action in one scrolling axis", async ({
+for (const { label, path } of publicPages) {
+  for (const reducedMotion of [false, true]) {
+    test(`${label} ${reducedMotion ? "reduced-motion" : "normal-motion"} state has no automated WCAG 2.2 AA violations`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({
+        reducedMotion: reducedMotion ? "reduce" : "no-preference",
+      });
+      await page.goto(path);
+
+      if (path === "/" && !reducedMotion) {
+        await revealSignaturePasses(page);
+      }
+
+      const results = await new AxeBuilder({ page })
+        .withTags(wcagTags)
+        .analyze();
+      const violations = results.violations.map((violation) => ({
+        id: violation.id,
+        impact: violation.impact,
+        targets: violation.nodes.map((node) => node.target),
+      }));
+
+      expect(violations).toEqual([]);
+    });
+  }
+}
+
+test("public pages keep content and actions at narrow and zoomed layouts", async ({
   page,
 }) => {
-  for (const viewport of [
-    { width: 320, height: 568 },
-    { width: 568, height: 320 },
-  ]) {
-    await page.setViewportSize(viewport);
-    await page.goto("/");
-    expect(
-      await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth <=
-          document.documentElement.clientWidth,
-      ),
-    ).toBe(true);
+  for (const { path } of publicPages) {
+    for (const viewport of [
+      { width: 320, height: 568 },
+      { width: 568, height: 320 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto(path);
+      await expectSoundLayout(page);
+      await expect(page.locator("main a").last()).toBeVisible();
+    }
+
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto(path);
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "200%";
+    });
+    await expectSoundLayout(page);
     await expect(page.locator("main a").last()).toBeVisible();
   }
 });
@@ -90,144 +197,166 @@ test("the introduction acetate copy does not overlap its working note", async ({
     if (!acetateCopy || !workingNote) {
       return true;
     }
-    const first = acetateCopy.getBoundingClientRect();
-    const second = workingNote.getBoundingClientRect();
+    const acetateBounds = acetateCopy.getBoundingClientRect();
+    const workingNoteBounds = workingNote.getBoundingClientRect();
     return !(
-      first.right <= second.left ||
-      second.right <= first.left ||
-      first.bottom <= second.top ||
-      second.bottom <= first.top
+      acetateBounds.right <= workingNoteBounds.left ||
+      workingNoteBounds.right <= acetateBounds.left ||
+      acetateBounds.bottom <= workingNoteBounds.top ||
+      workingNoteBounds.bottom <= acetateBounds.top
     );
   });
 
   expect(overlaps).toBe(false);
 });
 
-test("the Portfolio keeps its content at 200 percent text size", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto("/");
-  await page.evaluate(() => {
-    document.documentElement.style.fontSize = "200%";
-  });
-
-  const layout = await page.evaluate(() => ({
-    clientWidth: document.documentElement.clientWidth,
-    scrollWidth: document.documentElement.scrollWidth,
-  }));
-
-  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
-});
-
 test("interactive targets reach the 44 CSS pixel design aim", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto("/");
 
-  const undersizedTargets = await page
-    .locator(publicActions)
-    .filter({ visible: true })
-    .evaluateAll((targets) =>
-    targets.flatMap((target) => {
-      const { width, height } = target.getBoundingClientRect();
-      const styles = getComputedStyle(target);
-      if (styles.display === "none" || styles.visibility === "hidden") {
-        return [];
-      }
+  for (const { path } of publicPages) {
+    await page.goto(path);
+    const undersizedTargets = await page
+      .locator(publicActions)
+      .filter({ visible: true })
+      .evaluateAll((targets) =>
+        targets.flatMap((target) => {
+          const { width, height } = target.getBoundingClientRect();
+          return width < 44 || height < 44
+            ? [{ name: target.textContent?.trim(), width, height }]
+            : [];
+        }),
+      );
 
-      return width < 44 || height < 44
-        ? [{ name: target.textContent?.trim(), width, height }]
-        : [];
-    }),
-  );
-
-  expect(undersizedTargets).toEqual([]);
-});
-
-test("skip navigation moves keyboard focus to the main content", async ({ page }) => {
-  await page.goto("/");
-  await page.keyboard.press("Tab");
-
-  const skipLink = page.getByRole("link", { name: "Skip to main content" });
-  await expect(skipLink).toBeFocused();
-  await expect(skipLink).toBeInViewport();
-
-  await page.keyboard.press("Enter");
-  await expect(page.locator("#main-content")).toBeFocused();
-});
-
-test("keyboard focus follows the public action order without a trap", async ({
-  page,
-}) => {
-  await page.goto("/");
-  const actions = page.locator(publicActions).filter({ visible: true });
-  const actionCount = await actions.count();
-
-  for (let index = 0; index < actionCount; index += 1) {
-    await page.keyboard.press("Tab");
-    await expect(actions.nth(index)).toBeFocused();
+    expect(undersizedTargets).toEqual([]);
   }
 });
 
-test("the accessibility tree keeps one semantic document and one copy of each fact", async ({
+test("skip navigation moves keyboard focus on every public page", async ({
+  page,
+}) => {
+  for (const { path } of publicPages) {
+    await page.goto(path);
+    await page.keyboard.press("Tab");
+
+    const skipLink = page.getByRole("link", { name: "Skip to main content" });
+    await expect(skipLink).toBeFocused();
+    await expect(skipLink).toBeInViewport();
+
+    await page.keyboard.press("Enter");
+    await expect(page.locator("#main-content")).toBeFocused();
+  }
+});
+
+test("keyboard focus traverses forward and backward without a trap", async ({
+  page,
+}) => {
+  for (const { path } of publicPages) {
+    await page.goto(path);
+    const actions = page.locator(publicActions).filter({ visible: true });
+    const actionCount = await actions.count();
+
+    for (let index = 0; index < actionCount; index += 1) {
+      await page.keyboard.press("Tab");
+      await expect(actions.nth(index)).toBeFocused();
+    }
+
+    await page.keyboard.press("Shift+Tab");
+    await expect(actions.nth(actionCount - 2)).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(actions.last()).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(actions.last()).not.toBeFocused();
+  }
+});
+
+test("native links expose and perform their declared actions", async ({ page }) => {
+  await page.goto("/");
+  const actionContract = await page
+    .locator(publicActions)
+    .filter({ visible: true })
+    .evaluateAll((actions) => ({
+      allNativeAnchors: actions.every(
+        (action) => action instanceof HTMLAnchorElement,
+      ),
+      contactDestinations: actions
+        .filter((action) => action.textContent?.trim() === "Contact")
+        .map((action) => action.getAttribute("href")),
+      resumeDownloads: actions
+        .filter((action) => /resume/i.test(action.textContent ?? ""))
+        .every((action) => action.hasAttribute("download")),
+    }));
+
+  expect(actionContract).toEqual({
+    allNativeAnchors: true,
+    contactDestinations: ["mailto:haziqaimanfb@gmail.com"],
+    resumeDownloads: true,
+  });
+
+  const myConferenceAction = page.getByRole("link", {
+    name: "View MyConference",
+  });
+  await myConferenceAction.focus();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL(/#myconference$/);
+});
+
+test("the accessibility tree exposes the intended Portfolio document", async ({
   page,
 }) => {
   await page.goto("/");
-  const structure = await page.evaluate(() => {
-    const factClaims = Array.from(
+  const accessibilityTree = await page.locator("body").ariaSnapshot();
+  const structure = await page.evaluate(() => ({
+    acetateSemantics: Array.from(
+      document.querySelectorAll(".signature-acetate"),
+      (acetate) => acetate.getAttribute("aria-hidden"),
+    ),
+    factClaims: Array.from(
       document.querySelectorAll(
         ".featured-claim, .verified-fact > p:last-child",
       ),
       (claim) => claim.textContent?.trim() ?? "",
-    );
-    const headingLevels = Array.from(
+    ),
+    headingLevels: Array.from(
       document.querySelectorAll("h1, h2, h3, h4, h5, h6"),
       (heading) => Number(heading.tagName.slice(1)),
-    );
+    ),
+    imageAlternatives: Array.from(
+      document.images,
+      (image) => image.getAttribute("alt") ?? "",
+    ),
+  }));
 
-    return {
-      acetateSemantics: Array.from(
-        document.querySelectorAll(".signature-acetate"),
-        (acetate) => acetate.getAttribute("aria-hidden"),
-      ),
-      factClaims,
-      headingLevels,
-      imageAlternatives: Array.from(
-        document.images,
-        (image) => image.getAttribute("alt"),
-      ),
-      landmarks: {
-        banners: document.querySelectorAll("body > header").length,
-        contentInfo: document.querySelectorAll("body > footer").length,
-        mains: document.querySelectorAll("main").length,
-      },
-      nativeActionsOnly:
-        document.querySelectorAll("main [role='button'], main button").length === 0,
-      passHeadings: Array.from(
-        document.querySelectorAll("[data-signature-pass]"),
-        (pass) => pass.querySelector(":scope > header > h2")?.textContent?.trim(),
-      ),
-    };
-  });
-
-  expect(structure.landmarks).toEqual({
-    banners: 1,
-    contentInfo: 1,
-    mains: 1,
-  });
+  expect(accessibilityTree).toContain("- banner:");
+  expect(accessibilityTree).toContain("- main:");
+  expect(accessibilityTree).toContain("- contentinfo:");
+  expect(accessibilityTree).not.toContain("PORTFOLIO / 2026");
   expect(structure.headingLevels[0]).toBe(1);
   expect(
     structure.headingLevels.every(
       (level, index, levels) => index === 0 || level <= levels[index - 1] + 1,
     ),
   ).toBe(true);
-  expect(structure.passHeadings).toEqual([
+  for (const heading of [
     "MyConference: ownership and problem",
     "MyConference: workflow",
     "MyConference: safeguards and history",
-  ]);
+  ]) {
+    expect(accessibilityTree).toContain(`heading "${heading}" [level=2]`);
+  }
   expect(structure.acetateSemantics).toEqual(["true", "true", "true"]);
-  expect(structure.imageAlternatives.every(Boolean)).toBe(true);
-  expect(structure.nativeActionsOnly).toBe(true);
-  expect(new Set(structure.factClaims).size).toBe(structure.factClaims.length);
+  for (const alternative of structure.imageAlternatives) {
+    await expect(
+      page.getByRole("img", { name: alternative, exact: true }),
+    ).toHaveCount(1);
+  }
+  const accessibilityLines = accessibilityTree
+    .split("\n")
+    .map((line) => line.trim());
+  for (const claim of structure.factClaims) {
+    expect(
+      accessibilityLines.filter((line) => line === `- paragraph: ${claim}`),
+    ).toHaveLength(1);
+  }
 });
 
 test("focus indicators keep a two pixel perimeter and three to one contrast", async ({

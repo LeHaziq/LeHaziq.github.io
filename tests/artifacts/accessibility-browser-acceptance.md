@@ -10,14 +10,14 @@ All automated and locally executable checks pass. The remaining device limits ar
 
 ## Automated accessibility
 
-`npm run test:accessibility` runs the public Portfolio through normal motion and reduced motion with axe-core 4.13.0. The scan includes WCAG 2.0 A and AA, WCAG 2.1 A and AA, and WCAG 2.2 AA rules.
+`npm run test:accessibility` runs both public pages (`/` and `/404.html`) through normal motion and reduced motion with axe-core 4.13.0. The scan includes WCAG 2.0 A and AA, WCAG 2.1 A and AA, and WCAG 2.2 AA rules.
 
 | State | Chrome 151.0.7922.108 | Firefox 153.0 | WebKit 26.5 | Pixel 7 emulation | iPhone 15 emulation |
 | --- | --- | --- | --- | --- | --- |
 | Normal motion | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations |
 | Reduced motion | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations | Pass, 0 violations |
 
-The same suite confirms:
+The same suite inspects the rendered accessibility tree and confirms:
 
 - one banner, one main landmark, and one content information landmark;
 - one `h1` and heading levels without a skipped level;
@@ -29,7 +29,7 @@ The same suite confirms:
 
 ## Keyboard, focus, and targets
 
-Chrome, Firefox, and WebKit desktop runs pass the public action order, skip navigation, native scrolling keys, and no-trap checks. Activating the skip link moves focus to `main`.
+Chrome, Firefox, and WebKit desktop runs pass forward and reverse public action order, skip navigation on both public pages, native scrolling keys, native link activation, and no-trap checks. Activating the skip link moves focus to `main`.
 
 Every public action reaches 44 by 44 CSS pixels or larger at the tested narrow viewport. Focus uses a 3 CSS pixel verification-red perimeter plus a 3 CSS pixel paper perimeter. The measured adjacent-state contrasts are:
 
@@ -46,8 +46,9 @@ Chrome, Firefox, WebKit, Pixel 7 emulation, and iPhone 15 emulation pass these c
 - 320 by 568 CSS pixels;
 - 568 by 320 CSS pixels;
 - 200% root text size at a 320 CSS pixel viewport;
-- no horizontal document scrolling;
-- the final Portfolio action remains visible;
+- no horizontal document scrolling or clipped text;
+- every action remains within the viewport and the final action remains visible;
+- no overlapping text at the tested narrow and zoomed layouts;
 - no collision between the introduction acetate copy and its working note.
 
 The final browser inspection found no page errors. Standard and reduced-motion renders have no horizontal overflow. The reduced-motion interaction reports three static passes and no active interaction animation.
@@ -71,5 +72,8 @@ The final browser inspection found no page errors. Standard and reduced-motion r
 | Verification red had 1.25:1 contrast on cobalt and 2.69:1 on carbon black. | Added a coated-paper outer focus perimeter while retaining the verification-red inner perimeter. | Focus perimeter and contrast tests pass in all five projects. |
 | The skip link and site-name link fell short of the 44 CSS pixel design aim. | Added a 44 CSS pixel minimum block size. | Target-size tests pass in all five projects. |
 | Desktop acetate copy overlapped its working note. | Moved the note below the acetate action line while keeping the narrow layout in normal flow. | The collision test passes in desktop Chrome, Firefox, and WebKit. |
+| The 404 page had no skip-link focus target. | Added the shared `main-content` target and made it programmatically focusable. | Skip navigation passes on both public pages in all five projects. |
+| The MyConference attribution appeared twice in the rendered accessibility tree. | Kept the required visual safeguards attribution but marked that repeated presentation as hidden from assistive technology; the opening pass remains semantic. | Each Verified fact now has one semantic copy. |
+| Firefox could report a cancelled peel completing just beyond the 500 ms motion budget. | Reduced the peel and fallback duration from 480 ms to 450 ms, leaving scheduling headroom. | All five Firefox signature interaction tests pass. |
 
 No unresolved automated WCAG 2.2 AA violation remains. Release sign-off still needs the macOS Safari run and the physical-device checks listed above when those devices are available.

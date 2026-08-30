@@ -1,4 +1,4 @@
-<myconference-signature data-peel-duration="480">
+<myconference-signature data-peel-duration="450">
   <slot />
 </myconference-signature>
 
@@ -116,7 +116,7 @@
       const acetateElement = acetate;
       pass.dataset.signatureState = "revealing";
       await new Promise<void>((resolve) => {
-        const duration = Number(this.dataset.peelDuration) || 480;
+        const duration = Number(this.dataset.peelDuration) || 450;
         const timeout = window.setTimeout(finish, Math.min(duration + 10, 500));
 
         function finish() {

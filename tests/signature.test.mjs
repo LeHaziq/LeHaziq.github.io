@@ -14,7 +14,7 @@ test("the static manuscript defines three accessible signature passes", async ()
 
   assert.match(
     rootPage,
-    /<myconference-signature\b[^>]*data-peel-duration="480"/,
+    /<myconference-signature\b[^>]*data-peel-duration="450"/,
   );
   assert.doesNotMatch(rootPage, /data-stamp-duration=/);
 

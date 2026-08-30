@@ -199,7 +199,7 @@ main {
   right: 1.5rem;
   bottom: 1rem;
   color: transparent;
-  content: "PORTFOLIO / 2026";
+  content: "PORTFOLIO / 2026" / "";
   font-size: clamp(2rem, 6vw, 5rem);
   font-weight: 800;
   letter-spacing: -0.03em;
@@ -381,7 +381,7 @@ myconference-signature[data-motion="standard"]
 myconference-signature[data-motion="standard"]
   [data-signature-state="revealing"]
   .signature-acetate {
-  animation: signature-acetate-peel 480ms cubic-bezier(0.16, 1, 0.3, 1)
+  animation: signature-acetate-peel 450ms cubic-bezier(0.16, 1, 0.3, 1)
     both;
   will-change: clip-path, transform;
 }
