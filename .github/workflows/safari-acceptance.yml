@@ -1,0 +1,56 @@
+name: Safari acceptance
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/safari-acceptance.yml
+      - scripts/test-safari.mjs
+      - tests/safari-acceptance.test.mjs
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safari:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Record platform versions
+        shell: bash
+        run: |
+          safari_version="$(defaults read /Applications/Safari.app/Contents/Info CFBundleShortVersionString)"
+          macos_version="$(sw_vers -productVersion)"
+          echo "SAFARI_VERSION=$safari_version" >> "$GITHUB_ENV"
+          echo "MACOS_VERSION=$macos_version" >> "$GITHUB_ENV"
+          echo "Safari $safari_version on macOS $macos_version"
+
+      - name: Start SafariDriver
+        shell: bash
+        run: |
+          defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+          sudo safaridriver --enable
+          safaridriver --port 4444 > "$RUNNER_TEMP/safaridriver.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/safaridriver.pid"
+
+      - name: Run native Safari acceptance
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PORTFOLIO_URL: https://lehaziq.github.io/
+        run: node scripts/test-safari.mjs
+
+      - name: Upload Safari evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safari-acceptance
+          path: |
+            tests/artifacts/safari-acceptance.json
+            tests/artifacts/safari-desktop.png
+            tests/artifacts/safari-mobile-200-percent.png
+            tests/artifacts/safari-404.png
+            ${{ runner.temp }}/safaridriver.log
+          if-no-files-found: warn
+          retention-days: 90
