@@ -6,7 +6,7 @@ export default defineConfig({
   retries: 0,
   reporter: "line",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: "http://127.0.0.2:4381",
     trace: "retain-on-failure",
   },
   projects: [
@@ -34,8 +34,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1 --port 4173",
-    url: "http://127.0.0.1:4173",
-    reuseExistingServer: true,
+    command: "npm run build:production && npm run preview:test",
+    url: "http://127.0.0.2:4381",
+    reuseExistingServer: false,
   },
 });

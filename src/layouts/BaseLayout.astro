@@ -1,14 +1,17 @@
 ---
 import "../styles/global.css";
+import { productionIndexing } from "../release";
 
 interface Props {
   title: string;
   description: string;
+  indexable?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, indexable = true } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 const socialCardUrl = new URL("/social-card.svg", Astro.site);
+const robots = productionIndexing && indexable ? "index,follow" : "noindex,nofollow";
 ---
 
 <!doctype html>
@@ -17,7 +20,8 @@ const socialCardUrl = new URL("/social-card.svg", Astro.site);
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
-    <meta name="robots" content="noindex,nofollow" />
+    <meta name="robots" content={robots} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />

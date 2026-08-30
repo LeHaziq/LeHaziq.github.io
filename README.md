@@ -17,10 +17,13 @@ npm run dev
 ```sh
 npm run check
 npm test
+npm run measure:performance
 ```
 
 `npm test` builds the site, checks the generated routes and Downloadable resume,
-and scans the repository and generated files for disclosure risks.
+tests the built site in the browser, and scans the repository and generated files
+for disclosure risks. The performance command retains three mobile Lighthouse
+reports under `tests/artifacts/performance` and enforces the release thresholds.
 
 ## Project authoring
 
@@ -35,5 +38,7 @@ or asset references, and it omits draft projects and draft evidence.
 
 ## Indexing
 
-Builds block search indexing during validation. Production indexing remains a
-separate release step after the custom domain is ready.
+`npm run build` blocks indexing for validation. After cutover approval,
+`npm run build:production` emits `index,follow`, an index-allowing `robots.txt`,
+and the root-only sitemap. The Pages workflow exposes the same choice on manual
+dispatch; pushes to `main` always use validation indexing.

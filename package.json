@@ -6,9 +6,13 @@
   "scripts": {
     "audit": "node scripts/audit-disclosure.mjs",
     "build": "astro build",
+    "build:production": "PORTFOLIO_INDEXING=production astro build",
     "capture:signature": "RETAIN_CAPTURE=1 playwright test tests/browser/signature.capture.spec.mjs --project=chromium",
     "check": "astro check",
     "dev": "astro dev",
+    "measure:performance": "npm run build:production && node scripts/measure-performance.mjs",
+    "preview": "astro preview",
+    "preview:test": "node scripts/serve-dist.mjs",
     "test": "npm run build && npm run test:foundation && npm run test:browser && npm run audit",
     "test:accessibility": "playwright test tests/browser/accessibility.spec.mjs",
     "test:browser": "playwright test",
@@ -21,6 +25,7 @@
     "@fontsource-variable/public-sans": "5.3.0",
     "@playwright/test": "1.62.1",
     "astro": "7.2.9",
+    "lighthouse": "13.4.1",
     "typescript": "6.0.3"
   }
 }
