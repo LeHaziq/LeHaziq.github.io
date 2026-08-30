@@ -355,6 +355,7 @@ test("the project schema rejects current-performance language for historical met
     "PHP test-suite performance is now 664 seconds.",
     "The suite currently runs in 664 seconds.",
     "The latest passing PHP test run takes 664 seconds.",
+    "The current PHP tests take 664 seconds.",
   ]) {
     const project = {
       ...academicProject(),

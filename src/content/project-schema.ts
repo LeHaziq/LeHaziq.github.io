@@ -245,7 +245,7 @@ const myConferenceProhibitedClaimPatterns = [
 function claimsCurrentSuitePerformance(publicationText: string): boolean {
   const currentState = /\b(?:current(?:ly)?|latest|now|today|at present)\b/i;
   const testSuite =
-    /\b(?:PHP\s+)?(?:test(?:-suite)?(?:\s+(?:run|suite|performance))?|suite)\b/i;
+    /\b(?:PHP\s+)?(?:tests?(?:-suite)?(?:\s+(?:run|suite|performance))?|suite)\b/i;
   const measuredResult =
     /\b(?:pass(?:ed|es|ing)?|runs?|takes?|seconds?|minutes?|hours?|performance|migrations?|assertions?)\b|\d/i;
 
