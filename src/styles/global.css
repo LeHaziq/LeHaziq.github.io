@@ -390,7 +390,7 @@ myconference-signature[data-motion="standard"]
   from {
     filter: blur(0.12rem);
     opacity: 0.72;
-    transform: rotate(-3deg) scale(1.12);
+    transform: rotate(1deg) scale(1.12);
   }
 
   to {

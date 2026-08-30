@@ -120,6 +120,47 @@ test("reduced motion renders static passes without animated or pinned behavior",
   expect(reducedMotionState.scrollBehavior).toBe("auto");
 });
 
+test("an interrupted peel still completes within 500 milliseconds", async ({ page }) => {
+  await page.addInitScript(() => {
+    window.interruptedPeelDuration = null;
+    document.addEventListener("DOMContentLoaded", () => {
+      const firstPass = document.querySelector('[data-signature-pass="0"]');
+      let revealStartedAt = 0;
+      new MutationObserver(() => {
+        if (firstPass?.dataset.signatureState === "revealing") {
+          revealStartedAt = performance.now();
+          queueMicrotask(() => {
+            firstPass
+              .querySelector(".signature-acetate")
+              ?.getAnimations()
+              .forEach((animation) => animation.cancel());
+          });
+        }
+        if (
+          revealStartedAt > 0 &&
+          firstPass?.dataset.signatureState === "complete"
+        ) {
+          window.interruptedPeelDuration = performance.now() - revealStartedAt;
+        }
+      }).observe(firstPass, {
+        attributes: true,
+        attributeFilter: ["data-signature-state"],
+      });
+    });
+  });
+
+  await page.goto("/");
+  const firstPass = page.locator('[data-signature-pass="0"]');
+  await firstPass.scrollIntoViewIfNeeded();
+  await expect(firstPass).toHaveAttribute("data-signature-state", "complete");
+  await expect
+    .poll(() => page.evaluate(() => window.interruptedPeelDuration))
+    .not.toBeNull();
+  expect(
+    await page.evaluate(() => window.interruptedPeelDuration),
+  ).toBeLessThanOrEqual(500);
+});
+
 test("the complete Portfolio remains available without JavaScript", async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();

@@ -1,7 +1,4 @@
-<myconference-signature
-  data-peel-duration="480"
-  data-stamp-duration="140"
->
+<myconference-signature data-peel-duration="480">
   <slot />
 </myconference-signature>
 
@@ -120,7 +117,7 @@
       pass.dataset.signatureState = "revealing";
       await new Promise<void>((resolve) => {
         const duration = Number(this.dataset.peelDuration) || 480;
-        const timeout = window.setTimeout(finish, duration + 80);
+        const timeout = window.setTimeout(finish, Math.min(duration + 10, 500));
 
         function finish() {
           window.clearTimeout(timeout);
