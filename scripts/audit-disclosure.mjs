@@ -3,12 +3,7 @@ import { relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
-const ignoredDirectories = new Set([
-  ".astro",
-  ".git",
-  "node_modules",
-  "test-results",
-]);
+const ignoredDirectories = new Set([".astro", "node_modules", "test-results"]);
 const blockedPathFragments = [
   [".", "impeccable"].join(""),
   ["docs", "research"].join("/"),
@@ -80,7 +75,10 @@ async function listFiles(directory) {
   const files = [];
 
   for (const entry of entries) {
-    if (entry.isDirectory() && ignoredDirectories.has(entry.name)) {
+    if (
+      entry.name === ".git" ||
+      (entry.isDirectory() && ignoredDirectories.has(entry.name))
+    ) {
       continue;
     }
 
