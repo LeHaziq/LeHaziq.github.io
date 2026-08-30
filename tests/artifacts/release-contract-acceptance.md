@@ -15,8 +15,8 @@ All locally executable checks for issue 24 pass. Production indexing is availabl
 
 | Run | LCP | CLS | TBT | Transfer | Requests | Result |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
-| 1 | 1,654 ms | 0.038 | 0 ms | 149,257 bytes | 6 | Pass |
-| 2 | 1,804 ms | 0.038 | 0 ms | 149,257 bytes | 6 | Pass |
+| 1 | 1,655 ms | 0.038 | 0 ms | 149,257 bytes | 6 | Pass |
+| 2 | 1,654 ms | 0.038 | 0 ms | 149,257 bytes | 6 | Pass |
 | 3 | 1,654 ms | 0.038 | 0 ms | 149,257 bytes | 6 | Pass |
 
 The limits are LCP at most 2,500 ms, CLS at most 0.1, and TBT below 200 ms. Each run scored 1.00 in the Lighthouse performance category.
