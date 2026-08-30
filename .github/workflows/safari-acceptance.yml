@@ -25,6 +25,7 @@ jobs:
     env:
       EXPECT_REDUCED_MOTION: ${{ matrix.motion == 'reduced' }}
       PRIOR_SAFARI_RUN_URL: https://github.com/LeHaziq/LeHaziq.github.io/actions/runs/33310196035
+      SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v7
 

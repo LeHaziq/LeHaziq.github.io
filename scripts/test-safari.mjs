@@ -524,7 +524,8 @@ async function run() {
       platformName: session.capabilities?.platformName ?? "macOS",
       operatingSystemVersion: process.env.MACOS_VERSION ?? "unknown",
       motionPreference: expectedReducedMotion ? "reduced" : "standard",
-      sourceCommit: process.env.GITHUB_SHA ?? "local",
+      sourceCommit: process.env.SOURCE_COMMIT ?? process.env.GITHUB_SHA ?? "local",
+      checkoutCommit: process.env.GITHUB_SHA ?? "local",
       workflowRunUrl:
         process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
           ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
