@@ -3,7 +3,12 @@ import { relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repositoryRoot = fileURLToPath(new URL("../", import.meta.url));
-const ignoredDirectories = new Set([".astro", ".git", "node_modules"]);
+const ignoredDirectories = new Set([
+  ".astro",
+  ".git",
+  "node_modules",
+  "test-results",
+]);
 const blockedPathFragments = [
   [".", "impeccable"].join(""),
   ["docs", "research"].join("/"),
@@ -30,6 +35,9 @@ const allowedGeneratedBinaryExtensions = new Set([".woff2"]);
 const blockedAssetName =
   /(?:legacy|prototype|manuscript|rating|comparison|design-reference|current-proposed|screenshot)/i;
 const resumeName = "Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
+const retainedAcceptanceArtifacts = new Set([
+  "tests/artifacts/signature-interaction.webm",
+]);
 const blockedText = [
   {
     label: "GitHub personal access token",
@@ -185,11 +193,14 @@ for (const file of files) {
       normalizedPath.startsWith("dist/_astro/") &&
       allowedGeneratedBinaryExtensions.has(extension) &&
       generatedReferences.includes(originalFileName);
+    const retainedAcceptanceArtifact =
+      retainedAcceptanceArtifacts.has(projectPath);
 
     if (
       !approvedSourceAsset &&
       !approvedGeneratedAsset &&
-      !approvedGeneratedFont
+      !approvedGeneratedFont &&
+      !retainedAcceptanceArtifact
     ) {
       findings.push(`${projectPath}: unexpected binary file`);
     }

@@ -193,9 +193,13 @@ test("the Portfolio publishes MyConference safeguards and the dated optimization
   const optimizationIndex = rootPage.indexOf(
     'id="myconference-historical-optimization"',
   );
+  const signatureEnd = rootPage.indexOf(
+    "</myconference-signature>",
+    optimizationIndex,
+  );
   const academicIndex = rootPage.indexOf('class="academic-projects"');
   const safeguardsPass = rootPage.slice(safeguardsIndex, optimizationIndex);
-  const optimizationPass = rootPage.slice(optimizationIndex, academicIndex);
+  const optimizationPass = rootPage.slice(optimizationIndex, signatureEnd);
 
   assert.ok(safeguardsIndex > workflowIndex);
   assert.ok(optimizationIndex > safeguardsIndex);

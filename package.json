@@ -6,15 +6,18 @@
   "scripts": {
     "audit": "node scripts/audit-disclosure.mjs",
     "build": "astro build",
+    "capture:signature": "RETAIN_CAPTURE=1 playwright test tests/browser/signature.capture.spec.mjs --project=chromium",
     "check": "astro check",
     "dev": "astro dev",
-    "test": "npm run build && npm run test:foundation && npm run audit",
+    "test": "npm run build && npm run test:foundation && npm run test:browser && npm run audit",
+    "test:browser": "playwright test",
     "test:foundation": "node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@fontsource-variable/newsreader": "5.3.0",
     "@fontsource-variable/public-sans": "5.3.0",
+    "@playwright/test": "1.62.1",
     "astro": "7.2.9",
     "typescript": "6.0.3"
   }

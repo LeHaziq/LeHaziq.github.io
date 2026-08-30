@@ -1,0 +1,183 @@
+<myconference-signature
+  data-peel-duration="480"
+  data-stamp-duration="140"
+>
+  <slot />
+</myconference-signature>
+
+<script>
+  const storageKey = "portfolio:myconference-signature:v1";
+
+  class MyConferenceSignature extends HTMLElement {
+    private observer?: IntersectionObserver;
+    private reducedMotion?: MediaQueryList;
+    private requestedIndex = -1;
+    private completedCount = 0;
+    private revealing = false;
+
+    connectedCallback() {
+      if (this.dataset.initialized === "true") {
+        return;
+      }
+
+      this.dataset.initialized = "true";
+      const passes = this.signaturePasses;
+      if (passes.length !== 3) {
+        return;
+      }
+
+      this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      this.reducedMotion.addEventListener("change", this.handleMotionChange);
+
+      if (this.reducedMotion.matches) {
+        this.showStaticPasses();
+        return;
+      }
+
+      this.completedCount = this.readCompletedCount();
+      this.dataset.motion = "standard";
+      passes.forEach((pass, index) => {
+        pass.dataset.signatureState =
+          index < this.completedCount ? "complete" : "pending";
+      });
+
+      if (this.completedCount === passes.length) {
+        return;
+      }
+
+      if (!("IntersectionObserver" in window)) {
+        this.completeAllPasses();
+        return;
+      }
+
+      this.observer = new IntersectionObserver(this.handleIntersections, {
+        rootMargin: "0px 0px -35% 0px",
+        threshold: 0,
+      });
+      passes.forEach((pass) => this.observer?.observe(pass));
+    }
+
+    disconnectedCallback() {
+      this.observer?.disconnect();
+      this.reducedMotion?.removeEventListener("change", this.handleMotionChange);
+    }
+
+    private get signaturePasses() {
+      return Array.from(
+        this.querySelectorAll<HTMLElement>("[data-signature-pass]"),
+      );
+    }
+
+    private handleMotionChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        this.showStaticPasses();
+      }
+    };
+
+    private handleIntersections: IntersectionObserverCallback = (entries) => {
+      const visibleIndexes = entries
+        .filter((entry) => entry.isIntersecting)
+        .map((entry) => Number((entry.target as HTMLElement).dataset.signaturePass));
+
+      if (visibleIndexes.length === 0) {
+        return;
+      }
+
+      this.requestedIndex = Math.max(this.requestedIndex, ...visibleIndexes);
+      void this.revealRequestedPasses();
+    };
+
+    private async revealRequestedPasses() {
+      if (this.revealing) {
+        return;
+      }
+
+      this.revealing = true;
+      while (
+        this.completedCount <= this.requestedIndex &&
+        this.completedCount < this.signaturePasses.length
+      ) {
+        const nextCompletedCount = this.completedCount + 1;
+        this.writeCompletedCount(nextCompletedCount);
+        await this.revealPass(this.signaturePasses[this.completedCount]);
+        if (this.reducedMotion?.matches) {
+          this.revealing = false;
+          return;
+        }
+        this.completedCount = nextCompletedCount;
+      }
+      this.revealing = false;
+    }
+
+    private async revealPass(pass: HTMLElement) {
+      const acetate = pass.querySelector<HTMLElement>(".signature-acetate");
+      if (!acetate || this.reducedMotion?.matches) {
+        pass.dataset.signatureState = "complete";
+        return;
+      }
+
+      const acetateElement = acetate;
+      pass.dataset.signatureState = "revealing";
+      await new Promise<void>((resolve) => {
+        const duration = Number(this.dataset.peelDuration) || 480;
+        const timeout = window.setTimeout(finish, duration + 80);
+
+        function finish() {
+          window.clearTimeout(timeout);
+          acetateElement.removeEventListener("animationend", finish);
+          resolve();
+        }
+
+        acetateElement.addEventListener("animationend", finish);
+      });
+      if (this.reducedMotion?.matches) {
+        pass.dataset.signatureState = "static";
+        return;
+      }
+      pass.dataset.signatureState = "complete";
+      this.observer?.unobserve(pass);
+    }
+
+    private showStaticPasses() {
+      this.observer?.disconnect();
+      this.dataset.motion = "reduced";
+      this.signaturePasses.forEach((pass) => {
+        pass.getAnimations({ subtree: true }).forEach((animation) => animation.cancel());
+        pass.dataset.signatureState = "static";
+      });
+      this.completedCount = this.signaturePasses.length;
+      this.writeCompletedCount(this.completedCount);
+    }
+
+    private completeAllPasses() {
+      this.signaturePasses.forEach((pass) => {
+        pass.dataset.signatureState = "complete";
+      });
+      this.completedCount = this.signaturePasses.length;
+      this.writeCompletedCount(this.completedCount);
+    }
+
+    private readCompletedCount() {
+      try {
+        const storedCount = Number(window.sessionStorage.getItem(storageKey));
+        return Number.isInteger(storedCount)
+          ? Math.min(Math.max(storedCount, 0), this.signaturePasses.length)
+          : 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    private writeCompletedCount(count: number) {
+      try {
+        window.sessionStorage.setItem(storageKey, String(count));
+      } catch {
+        // The complete document remains available when storage is unavailable.
+      }
+    }
+  }
+
+  if (!customElements.get("myconference-signature")) {
+    customElements.define("myconference-signature", MyConferenceSignature);
+  }
+</script>

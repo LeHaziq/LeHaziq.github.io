@@ -319,6 +319,87 @@ h1 {
   color: white;
 }
 
+myconference-signature {
+  display: contents;
+}
+
+[data-signature-pass] {
+  isolation: isolate;
+  overflow: hidden;
+}
+
+[data-signature-pass] > :not(.signature-acetate) {
+  position: relative;
+  z-index: 1;
+}
+
+.signature-acetate {
+  --acetate-color: rgb(13 46 145 / 0.76);
+  position: absolute;
+  z-index: 0;
+  top: -7rem;
+  right: -5%;
+  width: min(34rem, 54%);
+  height: 24rem;
+  background: var(--acetate-color);
+  clip-path: polygon(28% 0, 100% 0, 100% 100%, 0 62%);
+  pointer-events: none;
+  transform: rotate(4deg) translate3d(25%, -40%, 0) scale(0.78);
+  transform-origin: 100% 0;
+}
+
+.featured-workflow-pass .signature-acetate {
+  --acetate-color: rgb(18 63 199 / 0.16);
+}
+
+myconference-signature[data-motion="standard"]
+  [data-signature-state="pending"]
+  .signature-acetate {
+  clip-path: polygon(7% 0, 100% 0, 100% 100%, 17% 84%, 0 26%);
+  transform: rotate(-7deg) translate3d(4%, 8%, 0) scale(1.35);
+}
+
+myconference-signature[data-motion="standard"]
+  [data-signature-state="revealing"]
+  .signature-acetate {
+  animation: signature-acetate-peel 480ms cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+  will-change: clip-path, transform;
+}
+
+myconference-signature[data-motion="standard"]
+  [data-signature-state="revealing"]
+  .verified-fact-label {
+  animation: signature-fact-stamp 140ms cubic-bezier(0.16, 1, 0.3, 1) 220ms
+    both;
+}
+
+@keyframes signature-acetate-peel {
+  from {
+    clip-path: polygon(7% 0, 100% 0, 100% 100%, 17% 84%, 0 26%);
+    transform: rotate(-7deg) translate3d(4%, 8%, 0) scale(1.35);
+  }
+
+  to {
+    clip-path: polygon(28% 0, 100% 0, 100% 100%, 0 62%);
+    transform: rotate(4deg) translate3d(25%, -40%, 0) scale(0.78);
+  }
+}
+
+@keyframes signature-fact-stamp {
+  from {
+    filter: blur(0.12rem);
+    opacity: 0.72;
+    transform: rotate(-3deg) scale(1.12);
+  }
+
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: rotate(-1deg) scale(1);
+  }
+}
+
 .featured-project-pass::before,
 .featured-safeguards-pass::before {
   position: absolute;
@@ -923,6 +1004,8 @@ h1 {
   *,
   *::before,
   *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }

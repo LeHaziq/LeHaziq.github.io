@@ -35,7 +35,11 @@ test("the static build emits usable root and missing pages", async () => {
     /I build secure, production-oriented web systems, with applied AI and computer vision as a second field of work\./,
   );
   assert.match(rootPage, /Download resume/);
-  assert.doesNotMatch(rootPage, /<script\b/i);
+  assert.equal([...rootPage.matchAll(/<script\b/g)].length, 1);
+  assert.match(
+    rootPage,
+    /<myconference-signature\b[\s\S]*<script type="module">[\s\S]*customElements/,
+  );
 
   assert.match(missingPage, /Page not found/);
   assert.match(missingPage, /href="\/"/);
