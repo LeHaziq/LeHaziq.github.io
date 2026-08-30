@@ -1,6 +1,6 @@
 ---
 name: MyConference Media Evidence
-description: Durable presentation rules for governed project screenshots and architecture diagrams.
+description: Presentation rules for the governed MyConference screenshots and tenant-isolation diagram.
 colors:
   archive-stage: "#171717"
   evidence-paper: "#f5f4ef"
@@ -44,7 +44,7 @@ components:
 
 **Creative North Star: "The Archival Evidence Stage"**
 
-This document governs only the media-evidence group used for MyConference and future project media that follows the same proof standard. It does not define the Portfolio's wider visual identity.
+This document governs only the MyConference media-evidence group delivered for issue 20. It does not define the Portfolio's wider visual identity or future project media.
 
 The dark, full-bleed stage separates governed artifacts from the surrounding case-study narrative. A recruiter should see the current product record first, then supporting responsive and architectural evidence. The presentation stays quiet so the artifacts carry the claim.
 

@@ -513,6 +513,10 @@ test("the project schema rejects missing required fields", () => {
 test("the schema represents every approved Featured project block", () => {
   const project = academicProject({
     projectType: "featured",
+    mediaSection: {
+      heading: "Fixture evidence visuals",
+      context: "Approved fixture evidence",
+    },
     links: [
       {
         label: "Pilot",
@@ -771,6 +775,10 @@ test("media blocks reference governed asset metadata without duplicating it", ()
   const project = projectSchema.parse({
     ...academicProject(),
     projectType: "featured",
+    mediaSection: {
+      heading: "Fixture evidence visuals",
+      context: "Approved fixture evidence",
+    },
     assets: [asset],
     blocks: [mediaBlock],
     academic: undefined,
@@ -790,6 +798,23 @@ test("media blocks require an explicit presentation role", () => {
   });
 
   assert.match(validationMessages(result), /presentation/i);
+});
+
+test("Featured projects with media require section copy", () => {
+  const result = projectSchema.safeParse({
+    ...academicProject(),
+    projectType: "featured",
+    blocks: [
+      {
+        type: "media",
+        assetReference: "fixture-capture",
+        presentation: "lead",
+      },
+    ],
+    academic: undefined,
+  });
+
+  assert.match(validationMessages(result), /media section heading and context/i);
 });
 
 test("project publication rejects duplicate slugs", () => {

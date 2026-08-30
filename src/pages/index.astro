@@ -62,6 +62,8 @@ type RenderedFeaturedBlock =
   | {
       type: "media";
       project: FeaturedProject;
+      heading: string;
+      context: string;
       entries: Array<{
         block: MediaBlock;
         asset: FeaturedAsset;
@@ -185,6 +187,9 @@ for (const project of projects) {
   }
 
   if (mediaBlocks.length > 0) {
+    if (!project.mediaSection) {
+      throw new Error(`Missing media section copy for "${project.projectSlug}"`);
+    }
     const entries = mediaBlocks.map((block) => {
       const asset = assetById.get(block.assetReference);
       if (!asset) {
@@ -200,6 +205,8 @@ for (const project of projects) {
     renderedFeaturedBlocks.push({
       type: "media",
       project,
+      heading: project.mediaSection.heading,
+      context: project.mediaSection.context,
       entries,
     });
   }
@@ -435,9 +442,9 @@ const chronologyGroups = [
         >
           <header class="featured-pass-heading media-pass-heading">
             <h2 id={`${pass.project.projectSlug}-visual-evidence-heading`}>
-              {pass.project.title}: evidence visuals
+              {pass.heading}
             </h2>
-            <p>Fresh runtime evidence and an original architecture diagram</p>
+            <p>{pass.context}</p>
           </header>
 
           <div class="evidence-visuals">

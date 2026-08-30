@@ -20,6 +20,9 @@ technologies:
   - Playwright
 displayOrder: 0
 publicationStatus: published
+mediaSection:
+  heading: "MyConference: evidence visuals"
+  context: Fresh runtime evidence and an original architecture diagram
 links: []
 evidence:
   - id: application-scope
@@ -224,8 +227,6 @@ evidence:
     publicationApproved: true
     qualifier: Runtime captured 30 August 2026
     assetReference: conference-home-desktop
-    publicCaption: Current Conference home at desktop width
-    alternativeText: MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines.
   - id: conference-home-phone-visual
     publicationStatus: published
     publicClaim: A fresh phone-width runtime capture records the same fictional MyConference Conference home in its current responsive layout.
@@ -235,8 +236,6 @@ evidence:
     publicationApproved: true
     qualifier: Runtime captured 30 August 2026
     assetReference: conference-home-phone
-    publicCaption: Current Conference home at phone width
-    alternativeText: MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column.
   - id: tenant-isolation-visual
     publicationStatus: published
     publicClaim: The tenant-isolation diagram explains the approved application and database boundaries without adding claims beyond the verified MyConference evidence.
@@ -245,8 +244,6 @@ evidence:
     attribution: MyConference tenant-isolation decisions led by Muhammad Haziq Aiman Anuar; diagram authored for this Portfolio
     publicationApproved: true
     assetReference: tenant-isolation-diagram
-    publicCaption: Tenant isolation, in layers
-    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, cross-tenant requests return 404, and ownership alone does not grant confidential access, which requires an audited Conference Chair Role Assignment.
 assets:
   - id: conference-home-desktop
     path: src/assets/projects/myconference/conference-home-desktop.png

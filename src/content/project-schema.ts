@@ -223,6 +223,12 @@ const academicProjectSchema = z.object({
 const featuredProjectSchema = z.object({
   ...commonProjectFields,
   projectType: z.literal("featured"),
+  mediaSection: z
+    .object({
+      heading: requiredText("Media section heading"),
+      context: requiredText("Media section context"),
+    })
+    .optional(),
   blocks: z.array(featuredBlockSchema).min(1),
 });
 
@@ -313,6 +319,9 @@ function projectPublicationText(
   if (project.projectType === "featured") {
     return [
       ...sharedText,
+      ...(project.mediaSection
+        ? [project.mediaSection.heading, project.mediaSection.context]
+        : []),
       ...project.blocks.flatMap(featuredBlockPublicationText),
     ].join("\n");
   }
@@ -331,6 +340,18 @@ export const projectSchema = z
     academicProjectSchema,
   ])
   .superRefine((project, context) => {
+    if (
+      project.projectType === "featured" &&
+      project.blocks.some((block) => block.type === "media") &&
+      !project.mediaSection
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["mediaSection"],
+        message: "Featured media require a media section heading and context",
+      });
+    }
+
     if (
       project.projectSlug !== "myconference" ||
       project.publicationStatus !== "published"
