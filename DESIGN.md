@@ -16,35 +16,35 @@ colors:
   image-shadow: "rgb(0 0 0 / 0.2)"
 typography:
   manuscript-display:
-    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
     fontWeight: 650
     fontSize: "clamp(2.55rem, 8vw, 6rem)"
     lineHeight: 0.92
     letterSpacing: "-0.035em"
   section-heading:
-    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
     fontWeight: 650
     fontSize: "clamp(2.5rem, 5vw, 4.75rem)"
     lineHeight: 0.95
     letterSpacing: "-0.03em"
   record-heading:
-    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
     fontWeight: 650
     fontSize: "clamp(1.35rem, 3.5vw, 3rem)"
     lineHeight: 1.15
     letterSpacing: "-0.025em"
   evidence-prose:
-    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
     fontWeight: 400
     fontSize: "clamp(1.2rem, 2vw, 1.55rem)"
     lineHeight: 1.48
   interface:
-    fontFamily: "Public Sans Variable, Arial, Helvetica, sans-serif"
+    fontFamily: "Public Sans Variable, Public Sans Fallback, Arial, Helvetica, sans-serif"
     fontWeight: "400 800"
     fontSize: "1rem"
     lineHeight: 1.65
   annotation:
-    fontFamily: "Newsreader Variable, Georgia, Times New Roman, serif"
+    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
     fontWeight: 400
     fontSize: "0.95rem"
     lineHeight: 1.4
@@ -93,9 +93,9 @@ The visual system uses six material roles from the approved direction:
 
 ## Typography
 
-Newsreader is the manuscript voice. It carries names, section headings, evidence prose, metrics, and working notes. Public Sans carries navigation, controls, technical labels, captions, and dense supporting prose. Both variable fonts are self-hosted from committed package versions; CSS imports only their upright weight axes.
+Newsreader is the manuscript voice. It carries names, section headings, evidence prose, metrics, and working notes. Public Sans carries navigation, controls, technical labels, captions, and dense supporting prose. Both variable fonts are self-hosted from committed package versions. The build includes the used Latin weight ranges plus Newsreader's italic working-note face.
 
-Georgia and Times New Roman form the Newsreader fallback chain. Arial and Helvetica form the Public Sans fallback chain. Copy remains available while fonts load, and neither fallback changes the content order.
+Newsreader Fallback adjusts local Georgia to the manuscript face's size and vertical metrics. Public Sans Fallback applies the same treatment to local Arial. Times New Roman and Helvetica remain last-resort system fallbacks. Copy remains available while fonts load, and the adjusted faces limit layout shift.
 
 Display text stops at 6rem and never tracks tighter than -0.035em. Evidence prose keeps a readable measure near 44rem. Labels use uppercase only where the manuscript needs indexing or verification language.
 

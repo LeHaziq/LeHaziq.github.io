@@ -1,3 +1,45 @@
+@font-face {
+  font-family: "Newsreader Variable";
+  font-style: normal;
+  font-weight: 400 650;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Newsreader Variable";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-wght-italic.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Georgia");
+  size-adjust: 97%;
+  ascent-override: 93%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Public Sans Variable";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource-variable/public-sans/files/public-sans-latin-wght-normal.woff2") format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Public Sans Fallback";
+  src: local("Arial");
+  size-adjust: 100%;
+  ascent-override: 91%;
+  descent-override: 23%;
+  line-gap-override: 0%;
+}
+
 :root {
   --paper: #f4f1e8;
   --paper-deep: #dfd9ca;
@@ -9,7 +51,7 @@
   --verification: #b42318;
   --sheet-shadow: 0 1.25rem 3.5rem rgb(12 21 48 / 0.22);
   color-scheme: light;
-  font-family: "Public Sans Variable", Arial, Helvetica, sans-serif;
+  font-family: "Public Sans Variable", "Public Sans Fallback", Arial, Helvetica, sans-serif;
   background: var(--cobalt);
   color: var(--ink);
 }
@@ -78,7 +120,7 @@ p {
 h1,
 h2,
 .introduction-acetate strong {
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-weight: 650;
 }
 
@@ -168,14 +210,14 @@ h1 {
   margin: 0;
   font-size: clamp(3.25rem, 8vw, 6rem);
   letter-spacing: -0.035em;
-  line-height: 0.88;
+  line-height: 0.92;
 }
 
 .introduction,
 .missing-page > p:not(.folio-line) {
   max-width: 40rem;
   margin: 2rem 0;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.35rem, 2.8vw, 2rem);
   line-height: 1.35;
 }
@@ -221,16 +263,9 @@ h1 {
   line-height: 0.95;
 }
 
-.introduction-acetate a {
-  align-self: flex-start;
-  min-height: 2.75rem;
-  margin-top: 2rem;
-  font-weight: 750;
-}
-
 .working-note {
   color: var(--graphite);
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: 0.95rem;
   font-style: italic;
   line-height: 1.4;
@@ -243,7 +278,7 @@ h1 {
   bottom: clamp(1.25rem, 3vw, 2.5rem);
   max-width: 20rem;
   margin: 0;
-  color: white;
+  color: var(--cobalt-light);
   transform: rotate(-1.5deg);
 }
 
@@ -367,7 +402,7 @@ h1 {
 .verified-fact > p:last-child {
   max-width: 44rem;
   margin: 0;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.2rem, 2vw, 1.55rem);
   line-height: 1.48;
 }
@@ -402,7 +437,7 @@ h1 {
 .workflow-list > li::before {
   color: var(--cobalt);
   content: counter(workflow-stage, decimal-leading-zero);
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: 1.8rem;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
@@ -561,7 +596,7 @@ h1 {
 .featured-project-close > p {
   max-width: 26rem;
   margin: 0 0 1.25rem;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.35rem, 2.6vw, 2rem);
   line-height: 1.35;
 }
@@ -579,7 +614,7 @@ h1 {
 .historical-metric-delta {
   margin: 0;
   color: var(--cobalt);
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(3rem, 7vw, 6rem);
   font-variant-numeric: tabular-nums;
   font-weight: 650;
@@ -615,7 +650,7 @@ h1 {
 .chronology-list h4 {
   max-width: 24ch;
   margin: 0;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.8rem, 3.5vw, 3rem);
   font-weight: 650;
   letter-spacing: -0.025em;
@@ -652,7 +687,7 @@ h1 {
 
 .project-outcome dd {
   color: var(--cobalt-dark);
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.2rem, 2vw, 1.55rem);
   font-weight: 650;
   line-height: 1.45;
@@ -742,7 +777,7 @@ h1 {
 .contact-close > p:not(.working-note) {
   max-width: 34rem;
   margin: 1.5rem 0 0;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: clamp(1.25rem, 2.6vw, 1.8rem);
   line-height: 1.4;
 }
@@ -759,7 +794,7 @@ h1 {
 
 .site-footer > p {
   margin: 0;
-  font-family: "Newsreader Variable", Georgia, "Times New Roman", serif;
+  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
   font-size: 1.1rem;
   font-weight: 650;
 }

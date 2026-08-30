@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 const generatedRootPage = new URL("../dist/index.html", import.meta.url);
@@ -70,12 +70,13 @@ test("the manuscript exposes the approved actions and destinations", async () =>
 
   assert.match(
     header,
-    /href="#myconference"[^>]*>MyConference<\/a>[\s\S]*href="#contact"[^>]*>Contact<\/a>[\s\S]*href="\/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26\.pdf"[^>]*download[^>]*>Resume<\/a>/,
+    /href="#myconference"[^>]*>MyConference<\/a>[\s\S]*href="mailto:haziqaimanfb@gmail\.com"[^>]*>Contact<\/a>[\s\S]*href="\/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26\.pdf"[^>]*download[^>]*>Resume<\/a>/,
   );
   assert.match(
     introduction,
     /href="#myconference"[^>]*>View MyConference<\/a>[\s\S]*href="\/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26\.pdf"[^>]*download[^>]*>Download resume<\/a>/,
   );
+  assert.equal([...introduction.matchAll(/<a\b/g)].length, 2);
   assert.match(
     myConferenceClose,
     /href="mailto:haziqaimanfb@gmail\.com"[^>]*>Email me<\/a>[\s\S]*href="\/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26\.pdf"[^>]*download[^>]*>Download resume<\/a>/,
@@ -103,4 +104,21 @@ test("the validation build carries the branded social-card contract", async () =
   assert.match(rootPage, /name="twitter:card" content="summary_large_image"/);
   assert.match(socialCard, /Muhammad Haziq Aiman Anuar/);
   assert.doesNotMatch(socialCard, /conference-home|<image\b/i);
+});
+
+test("the built type system uses only its self-hosted Latin faces and adjusted fallbacks", async () => {
+  const assetDirectory = new URL("../dist/_astro/", import.meta.url);
+  const styleFiles = (await readdir(assetDirectory)).filter((file) =>
+    file.endsWith(".css"),
+  );
+  const styles = (
+    await Promise.all(
+      styleFiles.map((file) => readFile(new URL(file, assetDirectory), "utf8")),
+    )
+  ).join("\n");
+
+  assert.equal([...styles.matchAll(/\.woff2\b/g)].length, 3);
+  assert.match(styles, /font-family:["']?Newsreader Fallback/);
+  assert.match(styles, /font-family:["']?Public Sans Fallback/);
+  assert.equal([...styles.matchAll(/size-adjust:/g)].length, 2);
 });
