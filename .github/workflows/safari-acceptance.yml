@@ -40,9 +40,6 @@ jobs:
       - name: Start SafariDriver
         shell: bash
         run: |
-          defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
-          defaults write com.apple.Safari WebKitTabToLinksPreferenceKey -bool true
-          defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2TabsToLinks -bool true
           if [[ "$EXPECT_REDUCED_MOTION" == "true" ]]; then
             defaults write com.apple.universalaccess reduceMotion -bool true
           else

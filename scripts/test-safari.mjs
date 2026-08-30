@@ -318,7 +318,7 @@ async function run() {
       Buffer.from(desktopScreenshot, "base64"),
     );
 
-    await pressKey("\uE004");
+    await pressKey("\uE004", ["\uE00A"]);
     const firstFocus = await execute(`
       const active = document.activeElement;
       return {
@@ -347,7 +347,7 @@ async function run() {
     await new Promise((resolve) => setTimeout(resolve, 250));
     const keyboardOrder = [];
     for (let index = 0; index < actions.length; index += 1) {
-      await pressKey("\uE004");
+      await pressKey("\uE004", ["\uE00A"]);
       keyboardOrder.push(await execute(`
         const active = document.activeElement;
         return {
@@ -536,6 +536,7 @@ async function run() {
       actions,
       firstFocus,
       skipTarget,
+      keyboardNavigationChord: "Option+Tab (Safari automation profile)",
       keyboardOrder,
       signature,
       resourceResults,
@@ -551,7 +552,7 @@ async function run() {
       priorRunUrl: process.env.PRIOR_SAFARI_RUN_URL ?? null,
       resolvedHarnessDefects: process.env.PRIOR_SAFARI_RUN_URL
         ? [
-            "Enabled Safari keyboard focus for links before starting SafariDriver.",
+            "Used Safari's native Option+Tab fallback because WebDriver automation windows isolate normal Safari preferences.",
             "Loaded each lazy image in its viewport before checking render dimensions.",
             "Tested standard and reduced-motion signature states separately.",
           ]
