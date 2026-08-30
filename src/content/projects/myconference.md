@@ -62,6 +62,62 @@ evidence:
     attribution: MyConference accessibility baseline and pilot operation led by Muhammad Haziq Aiman Anuar
     publicationApproved: true
     qualifier: Baseline and Authorized pilot status verified 30 August 2026
+  - id: workflow-call-for-papers
+    publicationStatus: published
+    publicClaim: The workflow opens with a call for papers.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-submission
+    publicationStatus: published
+    publicClaim: A submission enters the peer-review record.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-reviewer-assignment
+    publicationStatus: published
+    publicClaim: Reviewer assignment connects that record to its reviewer.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-review
+    publicationStatus: published
+    publicClaim: The review records the assessment for the submission.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-decision
+    publicationStatus: published
+    publicClaim: A decision records the outcome of peer review.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-revision
+    publicationStatus: published
+    publicClaim: Revision returns the submission for its next version.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: workflow-camera-ready-upload
+    publicationStatus: published
+    publicClaim: Camera-ready upload completes the record.
+    evidenceType: repository
+    provenance: Approved source and workflow documentation review
+    attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
 assets: []
 blocks:
   - type: narrative
@@ -72,6 +128,23 @@ blocks:
       - peer-review-problem
       - verified-stack
       - accessibility-and-pilot
+  - type: workflow
+    heading: "MyConference: workflow"
+    steps:
+      - stage: call-for-papers
+        evidenceReference: workflow-call-for-papers
+      - stage: submission
+        evidenceReference: workflow-submission
+      - stage: reviewer-assignment
+        evidenceReference: workflow-reviewer-assignment
+      - stage: review
+        evidenceReference: workflow-review
+      - stage: decision
+        evidenceReference: workflow-decision
+      - stage: revision
+        evidenceReference: workflow-revision
+      - stage: camera-ready-upload
+        evidenceReference: workflow-camera-ready-upload
 ---
 
-This readable record is the complete source for the first MyConference evidence pass.
+This readable record is the complete source for the first two MyConference evidence passes.

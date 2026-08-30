@@ -1,32 +1,75 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { selectPublishedProjects } from "../content/project-schema";
+import {
+  selectPublishedProjects,
+  workflowStageLabels,
+} from "../content/project-schema";
+import type { PublishedProject } from "../content/project-schema";
 
 const title = "Muhammad Haziq Aiman Anuar | Software Engineer";
 const description =
   "Software engineer building secure web systems, with research experience in AI and computer vision. Explore MyConference and academic projects.";
 const resumePath = "/Muhammad_Haziq_Aiman_Anuar_Resume_2026-7-26.pdf";
 const projects = selectPublishedProjects(await getCollection("projects"));
-const featuredPasses = projects.flatMap((project) => {
+type FeaturedProject = Extract<PublishedProject, { projectType: "featured" }>;
+type FeaturedBlock = FeaturedProject["blocks"][number];
+type FeaturedEvidence = FeaturedProject["evidence"][number];
+type NarrativeBlock = Extract<FeaturedBlock, { type: "narrative" }>;
+type WorkflowBlock = Extract<FeaturedBlock, { type: "workflow" }>;
+type FeaturedPass =
+  | {
+      type: "narrative";
+      project: FeaturedProject;
+      block: NarrativeBlock;
+      evidence: Array<FeaturedEvidence | undefined>;
+    }
+  | {
+      type: "workflow";
+      project: FeaturedProject;
+      block: WorkflowBlock;
+      steps: Array<WorkflowBlock["steps"][number] & {
+        label: string;
+        evidence: FeaturedEvidence | undefined;
+      }>;
+    };
+
+const featuredPasses: FeaturedPass[] = [];
+for (const project of projects) {
   if (project.projectType !== "featured") {
-    return [];
+    continue;
   }
 
   const evidenceById = new Map(
     project.evidence.map((evidence) => [evidence.id, evidence]),
   );
 
-  return project.blocks
-    .filter((block) => block.type === "narrative")
-    .map((block) => ({
-      project,
-      block,
-      evidence: block.evidenceReferences.map((evidenceId) =>
-        evidenceById.get(evidenceId),
-      ),
-    }));
-});
+  for (const block of project.blocks) {
+    if (block.type === "narrative") {
+      featuredPasses.push({
+        type: "narrative",
+        project,
+        block,
+        evidence: block.evidenceReferences.map((evidenceId) =>
+          evidenceById.get(evidenceId),
+        ),
+      });
+    }
+
+    if (block.type === "workflow") {
+      featuredPasses.push({
+        type: "workflow",
+        project,
+        block,
+        steps: block.steps.map((step) => ({
+          ...step,
+          label: workflowStageLabels[step.stage],
+          evidence: evidenceById.get(step.evidenceReference),
+        })),
+      });
+    }
+  }
+}
 const academicProjects = projects.filter(
   (project) => project.projectType === "academic",
 );
@@ -108,27 +151,56 @@ const chronologyGroups = [
       </div>
     </section>
 
-    {featuredPasses.map(({ project, block, evidence }) => (
-      <section
-        id={project.projectSlug}
-        class="featured-project-pass"
-        aria-labelledby={`${project.projectSlug}-ownership-heading`}
-      >
-        <header class="featured-pass-heading">
-          <h2 id={`${project.projectSlug}-ownership-heading`}>{block.heading}</h2>
-          <p>{project.contextLabel}</p>
-        </header>
+    {featuredPasses.map((pass) => pass.type === "narrative" ? (
+        <section
+          id={pass.project.projectSlug}
+          class="featured-project-pass"
+          aria-labelledby={`${pass.project.projectSlug}-ownership-heading`}
+        >
+          <header class="featured-pass-heading">
+            <h2 id={`${pass.project.projectSlug}-ownership-heading`}>
+              {pass.block.heading}
+            </h2>
+            <p>{pass.project.contextLabel}</p>
+          </header>
 
-        <ol class="featured-evidence-list">
-          {evidence.map((record) => record && (
-            <li id={`${project.projectSlug}-evidence-${record.id}`}>
-              <p class="verified-fact-label">Verified fact</p>
-              <p class="featured-claim">{record.publicClaim}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-    ))}
+          <ol class="featured-evidence-list">
+            {pass.evidence.map((record) => record && (
+              <li id={`${pass.project.projectSlug}-evidence-${record.id}`}>
+                <p class="verified-fact-label">Verified fact</p>
+                <p class="featured-claim">{record.publicClaim}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ) : (
+        <section
+          id={`${pass.project.projectSlug}-workflow`}
+          class="featured-workflow-pass"
+          aria-labelledby={`${pass.project.projectSlug}-workflow-heading`}
+        >
+          <header class="featured-pass-heading workflow-pass-heading">
+            <h2 id={`${pass.project.projectSlug}-workflow-heading`}>
+              {pass.block.heading}
+            </h2>
+            <p>{pass.project.contextLabel}</p>
+          </header>
+
+          <ol class="workflow-list">
+            {pass.steps.map((step) => step.evidence && (
+              <li
+                id={`${pass.project.projectSlug}-evidence-${step.evidence.id}`}
+                data-workflow-stage={step.stage}
+              >
+                <div>
+                  <h3>{step.label}</h3>
+                  <p>{step.evidence.publicClaim}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      ))}
 
     {academicProjects.length > 0 && (
       <section class="academic-projects" aria-labelledby="academic-projects-heading">

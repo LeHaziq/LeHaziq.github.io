@@ -98,10 +98,73 @@ h1 {
 }
 
 .featured-project-pass,
+.featured-workflow-pass,
 .academic-projects,
 .chronology {
   margin-inline: calc(50% - 50vw);
   padding-inline: max(1.25rem, calc((100vw - 72rem) / 2 + 1.25rem));
+}
+
+.featured-workflow-pass {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.55fr) minmax(0, 1.45fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  padding-top: clamp(3.5rem, 8vw, 6.5rem);
+  padding-bottom: clamp(3.5rem, 8vw, 6.5rem);
+  border-bottom: 0.125rem solid #171717;
+  background: #f5f4ef;
+  color: #171717;
+}
+
+.workflow-pass-heading > p {
+  color: #4c4c4c;
+}
+
+.workflow-pass-heading h2 {
+  max-width: 100%;
+  font-size: clamp(2rem, 4.2vw, 3.5rem);
+}
+
+.workflow-list {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border-top: 0.125rem solid #171717;
+  counter-reset: workflow-stage;
+  list-style: none;
+}
+
+.workflow-list > li {
+  display: grid;
+  grid-template-columns: minmax(3.5rem, 0.18fr) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 2rem);
+  padding: clamp(1.25rem, 3vw, 2rem) 0;
+  border-bottom: 0.0625rem solid #bbb9b0;
+  counter-increment: workflow-stage;
+}
+
+.workflow-list > li::before {
+  color: #093fb4;
+  content: counter(workflow-stage, decimal-leading-zero);
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.workflow-list h3 {
+  margin: 0;
+  color: #093fb4;
+  font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.workflow-list p {
+  max-width: 46rem;
+  margin: 0.625rem 0 0;
+  font-size: 1.0625rem;
+  line-height: 1.6;
 }
 
 .featured-project-pass {
@@ -352,6 +415,7 @@ h1 {
   }
 
   .featured-project-pass,
+  .featured-workflow-pass,
   .academic-projects,
   .chronology {
     grid-template-columns: 1fr;
