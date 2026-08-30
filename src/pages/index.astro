@@ -441,21 +441,23 @@ const chronologyGroups = [
           </header>
 
           <div class="evidence-visuals">
-            {pass.entries.map((entry, index) => (
-              <figure class:list={["evidence-visual", {
-                "evidence-visual-desktop": index === 0,
-                "evidence-visual-phone": entry.asset.id === "conference-home-phone",
-              }]}>
+            {pass.entries.map((entry) => (
+              <figure
+                class:list={[
+                  "evidence-visual",
+                  `evidence-visual-${entry.block.presentation}`,
+                ]}
+              >
                 <Image
                   src={entry.source}
-                  alt={entry.block.alternativeText}
+                  alt={entry.asset.alternativeText}
                   widths={entry.asset.kind === "runtime-capture" ? [390, 780, 1176, 1440] : undefined}
-                  sizes={index === 0 ? "(max-width: 72rem) 100vw, 72rem" : "(max-width: 44rem) 100vw, 48rem"}
+                  sizes={entry.block.presentation === "lead" ? "(max-width: 72rem) 100vw, 72rem" : "(max-width: 44rem) 100vw, 48rem"}
                   loading="lazy"
                   decoding="async"
                 />
                 <figcaption>
-                  <span>{entry.block.caption}</span>
+                  <span>{entry.asset.caption}</span>
                 </figcaption>
               </figure>
             ))}

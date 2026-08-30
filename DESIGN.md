@@ -85,7 +85,7 @@ The stage runs edge to edge while its content aligns to the Portfolio's 72rem co
 
 At 44rem and below, both grids become one column and the first record stops spanning columns. Keep phone captures centered and no wider than 24.375rem. Other records may use the available width.
 
-**The first-record rule.** Put the strongest wide-format runtime record first. Entry order controls the full-width visual hierarchy.
+**The lead-record rule.** Assign the `lead` presentation to the strongest wide-format runtime record. Use `phone` for the constrained responsive capture and `supporting` for the remaining evidence; record order still controls reading order.
 
 ## Elevation & Depth
 

@@ -420,7 +420,7 @@ h1 {
   margin: 0;
 }
 
-.evidence-visual-desktop {
+.evidence-visual-lead {
   grid-column: 1 / -1;
 }
 
@@ -627,7 +627,7 @@ h1 {
     grid-template-columns: 1fr;
   }
 
-  .evidence-visual-desktop {
+  .evidence-visual-lead {
     grid-column: auto;
   }
 

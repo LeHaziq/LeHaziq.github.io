@@ -246,7 +246,7 @@ evidence:
     publicationApproved: true
     assetReference: tenant-isolation-diagram
     publicCaption: Tenant isolation, in layers
-    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
+    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, cross-tenant requests return 404, and ownership alone does not grant confidential access, which requires an audited Conference Chair Role Assignment.
 assets:
   - id: conference-home-desktop
     path: src/assets/projects/myconference/conference-home-desktop.png
@@ -276,7 +276,7 @@ assets:
     ownerOrProvenance: Original Portfolio diagram authored from approved MyConference architecture evidence
     publicationApproved: true
     caption: Tenant isolation, in layers
-    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
+    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, cross-tenant requests return 404, and ownership alone does not grant confidential access, which requires an audited Conference Chair Role Assignment.
     evidenceReferences:
       - tenant-isolation-visual
       - tenant-table-ownership
@@ -285,6 +285,7 @@ assets:
       - forced-row-level-security
       - missing-organisation-context
       - cross-tenant-not-found
+      - confidential-access
     fictionalDataCheck: not-applicable
     decorative: false
 blocks:
@@ -371,28 +372,13 @@ blocks:
     evidenceReference: historical-test-optimization
   - type: media
     assetReference: conference-home-desktop
-    caption: Current Conference home at desktop width
-    alternativeText: MyConference Conference overview at desktop width with fictional Clockwork Kites Guild data, four work items, three responsibility summaries, and 2099 deadlines.
-    evidenceReferences:
-      - conference-home-desktop-visual
+    presentation: lead
   - type: media
     assetReference: conference-home-phone
-    caption: Current Conference home at phone width
-    alternativeText: MyConference Conference overview at phone width with fictional Clockwork Kites Guild data and the same 2099 work queue reflowed into one column.
-    evidenceReferences:
-      - conference-home-phone-visual
+    presentation: phone
   - type: media
     assetReference: tenant-isolation-diagram
-    caption: Tenant isolation, in layers
-    alternativeText: Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404.
-    evidenceReferences:
-      - tenant-isolation-visual
-      - tenant-table-ownership
-      - composite-tenant-keys
-      - application-tenant-scopes
-      - forced-row-level-security
-      - missing-organisation-context
-      - cross-tenant-not-found
+    presentation: supporting
 ---
 
 This readable record is the complete source for the MyConference evidence passes, historical optimization, and approved visual evidence.

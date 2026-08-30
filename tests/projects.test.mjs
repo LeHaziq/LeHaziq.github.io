@@ -491,8 +491,12 @@ test("the Portfolio publishes the Academic projects in the approved order", asyn
       .length,
     2,
   );
+  const academicProjects = rootPage.slice(
+    rootPage.indexOf('<section class="academic-projects"'),
+    rootPage.indexOf('<section class="chronology"'),
+  );
   assert.doesNotMatch(
-    rootPage,
+    academicProjects,
     /PyTorch|commercial deployment|public paper|repository|model card|demo|diagram|screenshot/i,
   );
 });
@@ -564,9 +568,7 @@ test("the schema represents every approved Featured project block", () => {
       {
         type: "media",
         assetReference: "tenant-diagram",
-        caption: "Tenant isolation boundaries.",
-        alternativeText: "A tenant isolation boundary diagram.",
-        evidenceReferences: ["fixture-evidence"],
+        presentation: "lead",
       },
     ],
   });
@@ -732,6 +734,7 @@ test("the project schema rejects incomplete informative media", () => {
   for (const [field, value, expectedMessage] of [
     ["caption", "", /Asset caption is required/i],
     ["alternativeText", "", /useful alternative text/i],
+    ["alternativeText", "Image.", /useful alternative text/i],
     ["evidenceReferences", [], /supporting evidence/i],
     ["fictionalDataCheck", "not-applicable", /confirmed fictional-data check/i],
   ]) {
@@ -747,7 +750,7 @@ test("the project schema rejects incomplete informative media", () => {
   }
 });
 
-test("project publication rejects media metadata that differs from its asset", () => {
+test("media blocks reference governed asset metadata without duplicating it", () => {
   const asset = {
     id: "fixture-capture",
     path: "src/assets/projects/fixture.png",
@@ -763,40 +766,30 @@ test("project publication rejects media metadata that differs from its asset", (
   const mediaBlock = {
     type: "media",
     assetReference: asset.id,
-    caption: asset.caption,
-    alternativeText: asset.alternativeText,
-    evidenceReferences: asset.evidenceReferences,
+    presentation: "phone",
   };
+  const project = projectSchema.parse({
+    ...academicProject(),
+    projectType: "featured",
+    assets: [asset],
+    blocks: [mediaBlock],
+    academic: undefined,
+  });
 
-  for (const [field, value] of [
-    ["caption", "Different caption."],
-    ["alternativeText", "Different alternative text."],
-    ["evidenceReferences", ["different-evidence"]],
-  ]) {
-    const project = projectSchema.parse({
-      ...academicProject(),
-      projectType: "featured",
-      assets: [asset],
-      blocks: [{ ...mediaBlock, [field]: value }],
-      evidence:
-        field === "evidenceReferences"
-          ? [
-              ...academicProject().evidence,
-              {
-                ...academicProject().evidence[0],
-                id: "different-evidence",
-              },
-            ]
-          : academicProject().evidence,
-      academic: undefined,
-    });
+  const [published] = selectPublishedProjects([
+    { id: "fixture.md", data: project },
+  ]);
 
-    assert.throws(
-      () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
-      new RegExp(`media ${field} does not match asset "fixture-capture"`),
-      field,
-    );
-  }
+  assert.deepEqual(published.blocks[0], mediaBlock);
+});
+
+test("media blocks require an explicit presentation role", () => {
+  const result = featuredBlockSchema.safeParse({
+    type: "media",
+    assetReference: "fixture-capture",
+  });
+
+  assert.match(validationMessages(result), /presentation/i);
 });
 
 test("project publication rejects duplicate slugs", () => {
@@ -1005,7 +998,7 @@ test("the Portfolio renders governed MyConference visuals with reserved dimensio
   );
   assert.match(
     visualSection,
-    /alt="Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, and cross-tenant requests return 404\."/,
+    /alt="Diagram showing Organisation context and Eloquent scopes before forced PostgreSQL row-level security; tenant tables carry organisation_id, composite Conference and Organisation keys must match, missing context returns no rows, cross-tenant requests return 404, and ownership alone does not grant confidential access, which requires an audited Conference Chair Role Assignment\."/,
   );
   assert.doesNotMatch(
     visualSection,

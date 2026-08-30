@@ -70,7 +70,10 @@ export const projectAssetSchema = z
       return;
     }
 
-    if (asset.alternativeText === "") {
+    if (
+      asset.alternativeText.trim().length < 12 ||
+      /^(?:image|photo|screenshot|diagram)[.!]?$/i.test(asset.alternativeText)
+    ) {
       context.addIssue({
         code: "custom",
         path: ["alternativeText"],
@@ -174,10 +177,10 @@ const metricBlockSchema = z.object({
 const mediaBlockSchema = z.object({
   type: z.literal("media"),
   assetReference: stableId,
-  caption: requiredText("Media caption"),
-  alternativeText: requiredText("Media alternative text"),
-  evidenceReferences,
-});
+  presentation: z.enum(["lead", "phone", "supporting"], {
+    error: "Media presentation is required",
+  }),
+}).strict();
 
 export const featuredBlockSchema = z.discriminatedUnion("type", [
   narrativeBlockSchema,
@@ -271,7 +274,7 @@ function featuredBlockPublicationText(
     case "metric":
       return [block.comparison, block.unit, block.qualifier];
     case "media":
-      return [block.caption, block.alternativeText];
+      return [];
     case "verified-fact":
       return [];
   }
@@ -392,6 +395,9 @@ function referencedEvidence(project: Project): string[] {
     if (block.type === "workflow") {
       return block.stepEvidenceReferences;
     }
+    if (block.type === "media") {
+      return [];
+    }
     return block.evidenceReferences;
   });
 }
@@ -497,32 +503,10 @@ export function selectPublishedProjects(
           }
         }
 
-        if (block.type === "media") {
-          const asset = assetsById.get(block.assetReference);
-          if (!asset) {
-            throw new Error(
-              `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,
-            );
-          }
-
-          if (block.caption !== asset.caption) {
-            throw new Error(
-              `Project "${entry.data.projectSlug}" media caption does not match asset "${asset.id}"`,
-            );
-          }
-          if (block.alternativeText !== asset.alternativeText) {
-            throw new Error(
-              `Project "${entry.data.projectSlug}" media alternativeText does not match asset "${asset.id}"`,
-            );
-          }
-          if (
-            JSON.stringify(block.evidenceReferences) !==
-            JSON.stringify(asset.evidenceReferences)
-          ) {
-            throw new Error(
-              `Project "${entry.data.projectSlug}" media evidenceReferences does not match asset "${asset.id}"`,
-            );
-          }
+        if (block.type === "media" && !assetsById.has(block.assetReference)) {
+          throw new Error(
+            `Project "${entry.data.projectSlug}" references missing asset "${block.assetReference}"`,
+          );
         }
       }
     }
