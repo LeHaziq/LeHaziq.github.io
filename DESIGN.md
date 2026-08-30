@@ -5,7 +5,7 @@ colors:
   coated-paper: "#f4f1e8"
   paper-depth: "#dfd9ca"
   carbon-black: "#171916"
-  graphite-note: "#50544e"
+  graphite: "#50544e"
   manuscript-rule: "#aaa596"
   cobalt-acetate: "#123fc7"
   cobalt-depth: "#0d2e91"
@@ -43,11 +43,6 @@ typography:
     fontWeight: "400 800"
     fontSize: "1rem"
     lineHeight: 1.65
-  annotation:
-    fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, Times New Roman, serif"
-    fontWeight: 400
-    fontSize: "0.95rem"
-    lineHeight: 1.4
   label:
     fontFamily: "Public Sans Variable, Arial, Helvetica, sans-serif"
     fontWeight: 800
@@ -71,9 +66,6 @@ components:
     backgroundColor: "{colors.verification-red}"
     textColor: "#fff"
     typography: "{typography.label}"
-  working-note:
-    textColor: "{colors.graphite-note}"
-    typography: "{typography.annotation}"
 ---
 
 # Design system: Margin of Record
@@ -88,12 +80,12 @@ The visual system uses six material roles from the approved direction:
 - Cobalt acetate marks MyConference ownership and safeguards.
 - Carbon black is the default reading color.
 - Verification red marks only the exact phrase `Verified fact`, evidence-caption rules, and critical focus annotations.
-- Graphite notes explain the manuscript's working structure. They never claim third-party review or public proof.
+- Graphite distinguishes secondary copy from the main carbon-black text.
 - Blind embossing appears only as low-contrast paper depth. It never carries required information.
 
 ## Typography
 
-Newsreader is the manuscript voice. It carries names, section headings, evidence prose, metrics, and working notes. Public Sans carries navigation, controls, technical labels, captions, and dense supporting prose. Both variable fonts are self-hosted from committed package versions. The build includes the used Latin weight ranges plus Newsreader's italic working-note face.
+Newsreader is the manuscript voice. It carries names, section headings, evidence prose, and metrics. Public Sans carries navigation, controls, technical labels, captions, and dense supporting prose. Both variable fonts are self-hosted from committed package versions. The build includes only the used Latin weight ranges.
 
 Newsreader Fallback adjusts local Georgia to the manuscript face's size and vertical metrics. Public Sans Fallback applies the same treatment to local Arial. Times New Roman and Helvetica remain last-resort system fallbacks. Copy remains available while fonts load, and the adjusted faces limit layout shift.
 
@@ -113,7 +105,7 @@ The next issue may animate acetate progression. The issue 21 baseline remains co
 
 ## Evidence and media
 
-Verified facts have one semantic copy. Their red stamp may rotate by one degree, but the claim text stays level and readable. Working notes use graphite or a tint of the surface they sit on. They must not use verification red or resemble an evidence stamp.
+Verified facts have one semantic copy. Their red stamp may rotate by one degree, but the claim text stays level and readable.
 
 Each governed visual stays in a semantic figure with its approved alternative text and caption. Runtime captures retain responsive candidates and reserved dimensions. The phone capture remains narrower than the desktop record. The original tenant-isolation diagram is not cropped, rounded, or masked.
 

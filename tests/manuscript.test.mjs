@@ -51,6 +51,7 @@ test("the guided manuscript follows the approved document order", async () => {
   assert.match(workflow, /Current Conference home at phone width/);
   assert.match(safeguards, /Tenant isolation, in layers/);
   assert.doesNotMatch(rootPage, /class="featured-media-pass"/);
+  assert.doesNotMatch(rootPage, /Working note|working-note/i);
 });
 
 test("the manuscript exposes the approved actions and destinations", async () => {
@@ -117,7 +118,7 @@ test("the built type system uses only its self-hosted Latin faces and adjusted f
     )
   ).join("\n");
 
-  assert.equal([...styles.matchAll(/\.woff2\b/g)].length, 3);
+  assert.equal([...styles.matchAll(/\.woff2\b/g)].length, 2);
   assert.match(styles, /font-family:["']?Newsreader Fallback/);
   assert.match(styles, /font-family:["']?Public Sans Fallback/);
   assert.equal([...styles.matchAll(/size-adjust:/g)].length, 2);

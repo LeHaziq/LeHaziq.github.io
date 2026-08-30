@@ -7,14 +7,6 @@
 }
 
 @font-face {
-  font-family: "Newsreader Variable";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-wght-italic.woff2") format("woff2-variations");
-}
-
-@font-face {
   font-family: "Newsreader Fallback";
   src: local("Georgia");
   size-adjust: 97%;
@@ -279,25 +271,6 @@ h1 {
   font-size: clamp(2.25rem, 3.5vw, 3rem);
   letter-spacing: -0.03em;
   line-height: 0.95;
-}
-
-.working-note {
-  color: var(--graphite);
-  font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
-  font-size: 0.95rem;
-  font-style: italic;
-  line-height: 1.4;
-}
-
-.introduction-section > .working-note {
-  position: absolute;
-  z-index: 3;
-  right: clamp(1.25rem, 4vw, 3rem);
-  bottom: 0.75rem;
-  max-width: 20rem;
-  margin: 0;
-  color: var(--cobalt-light);
-  transform: rotate(-1.5deg);
 }
 
 .actions a {
@@ -859,22 +832,16 @@ myconference-signature[data-motion="standard"]
 
 .contact-close {
   position: relative;
+  display: block;
   background: var(--paper);
   color: var(--ink);
-}
-
-.contact-close > .working-note {
-  grid-row: 1 / span 3;
-  max-width: 15rem;
-  margin: 0;
-  transform: rotate(-1deg);
 }
 
 .contact-close h2 {
   max-width: 12ch;
 }
 
-.contact-close > p:not(.working-note) {
+.contact-close > p {
   max-width: 34rem;
   margin: 1.5rem 0 0;
   font-family: "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman", serif;
@@ -933,20 +900,6 @@ myconference-signature[data-motion="standard"]
     min-height: 19rem;
   }
 
-  .introduction-section > .working-note {
-    position: relative;
-    right: auto;
-    bottom: auto;
-    grid-column: 1 / -1;
-    margin: 0;
-    padding: 1rem 1.25rem;
-    background: var(--cobalt-dark);
-    transform: none;
-  }
-
-  .contact-close > .working-note {
-    grid-row: auto;
-  }
 }
 
 @media (max-width: 44rem) {

@@ -183,33 +183,6 @@ test("public pages keep content and actions at narrow and zoomed layouts", async
   }
 });
 
-test("the introduction acetate copy does not overlap its working note", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/");
-
-  const overlaps = await page.evaluate(() => {
-    const acetateCopy = document.querySelector(".introduction-acetate > span");
-    const workingNote = document.querySelector(
-      ".introduction-section > .working-note",
-    );
-    if (!acetateCopy || !workingNote) {
-      return true;
-    }
-    const acetateBounds = acetateCopy.getBoundingClientRect();
-    const workingNoteBounds = workingNote.getBoundingClientRect();
-    return !(
-      acetateBounds.right <= workingNoteBounds.left ||
-      workingNoteBounds.right <= acetateBounds.left ||
-      acetateBounds.bottom <= workingNoteBounds.top ||
-      workingNoteBounds.bottom <= acetateBounds.top
-    );
-  });
-
-  expect(overlaps).toBe(false);
-});
-
 test("interactive targets reach the 44 CSS pixel design aim", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 });
 
