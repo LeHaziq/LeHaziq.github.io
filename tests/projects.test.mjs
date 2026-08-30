@@ -234,7 +234,7 @@ test("the Portfolio publishes MyConference safeguards and the dated optimization
   }
   assert.equal(
     [...safeguardsPass.matchAll(/class="verified-fact"/g)].length,
-    5,
+    10,
   );
   assert.match(
     safeguardsPass,
@@ -354,6 +354,7 @@ test("the project schema rejects current-performance language for historical met
     "MyConference's current passing PHP test run takes 664 seconds.",
     "PHP test-suite performance is now 664 seconds.",
     "The suite currently runs in 664 seconds.",
+    "The latest passing PHP test run takes 664 seconds.",
   ]) {
     const project = {
       ...academicProject(),
@@ -385,6 +386,28 @@ test("the project schema rejects current-performance language for historical met
       publicClaim,
     );
   }
+
+  const projectWithDecisionClaim = {
+    ...academicProject(),
+    projectSlug: "myconference",
+    projectType: "featured",
+    blocks: [
+      {
+        type: "engineering-decision",
+        situation: "A dated comparison needed careful wording.",
+        choice: "Keep the historical qualifier.",
+        rationale: "A dated result does not describe the current suite.",
+        result: "The latest passing PHP test run takes 664 seconds.",
+        evidenceReferences: ["fixture-evidence"],
+      },
+    ],
+  };
+  delete projectWithDecisionClaim.academic;
+
+  assert.match(
+    validationMessages(projectSchema.safeParse(projectWithDecisionClaim)),
+    /Historical MyConference metrics cannot claim current suite performance/,
+  );
 });
 
 test("the generated Portfolio omits prohibited MyConference claims", async () => {
@@ -755,6 +778,13 @@ test("project publication rejects duplicated Verified fact claims", () => {
   const project = projectSchema.parse({
     ...academicProject(),
     projectType: "featured",
+    evidence: [
+      ...academicProject().evidence,
+      {
+        ...academicProject().evidence[0],
+        id: "duplicate-evidence",
+      },
+    ],
     blocks: [
       {
         type: "verified-fact",
@@ -762,7 +792,7 @@ test("project publication rejects duplicated Verified fact claims", () => {
       },
       {
         type: "verified-fact",
-        evidenceReferences: ["fixture-evidence"],
+        evidenceReferences: ["duplicate-evidence"],
       },
     ],
     academic: undefined,
@@ -770,7 +800,7 @@ test("project publication rejects duplicated Verified fact claims", () => {
 
   assert.throws(
     () => selectPublishedProjects([{ id: "fixture.md", data: project }]),
-    /duplicates Verified fact claim "fixture-evidence"/,
+    /duplicates Verified fact claim "A fixture claim\."/,
   );
 });
 

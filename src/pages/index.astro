@@ -56,12 +56,16 @@ type RenderedFeaturedBlock =
       evidence: FeaturedEvidence | undefined;
     };
 
-const technicalTerms = new Set(["organisation_id", "404"]);
+const technicalTerms = ["organisation_id", "404"] as const;
+const technicalTermPattern = new RegExp(`(${technicalTerms.join("|")})`, "g");
 const technicalTextParts = (value: string) =>
   value
-    .split(/(organisation_id|404)/g)
+    .split(technicalTermPattern)
     .filter(Boolean)
-    .map((text) => ({ text, code: technicalTerms.has(text) }));
+    .map((text) => ({
+      text,
+      code: technicalTerms.some((technicalTerm) => technicalTerm === text),
+    }));
 
 const renderedFeaturedBlocks: RenderedFeaturedBlock[] = [];
 for (const project of projects) {

@@ -125,11 +125,51 @@ evidence:
     attribution: MyConference peer-review workflow led by Muhammad Haziq Aiman Anuar
     publicationApproved: true
     qualifier: Source and documentation snapshot verified 30 August 2026
-  - id: tenant-isolation
+  - id: tenant-table-ownership
     publicationStatus: published
-    publicClaim: Every tenant table carries organisation_id; composite Conference and Organisation keys prevent mismatches; application scopes enforce the application boundary; forced PostgreSQL row-level security protects raw queries; missing Organisation context returns no tenant rows; and cross-tenant requests return 404.
+    publicClaim: Every tenant table carries organisation_id to record its Organisation ownership.
     evidenceType: repository
-    provenance: Approved source, architecture, policy, and tenancy-test review
+    provenance: Approved tenant-table source and schema review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: composite-tenant-keys
+    publicationStatus: published
+    publicClaim: Composite Conference and Organisation keys prevent mismatched pairs.
+    evidenceType: repository
+    provenance: Approved schema, constraint, and tenancy-test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: application-tenant-scopes
+    publicationStatus: published
+    publicClaim: Application scopes enforce the application-layer tenant boundary.
+    evidenceType: repository
+    provenance: Approved application scope and tenancy-test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: forced-row-level-security
+    publicationStatus: published
+    publicClaim: Forced PostgreSQL row-level security protects raw queries.
+    evidenceType: repository
+    provenance: Approved database policy and privilege-test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: missing-organisation-context
+    publicationStatus: published
+    publicClaim: Missing Organisation context returns no tenant rows.
+    evidenceType: repository
+    provenance: Approved missing-context source and test review
+    attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
+    publicationApproved: true
+    qualifier: Source and documentation snapshot verified 30 August 2026
+  - id: cross-tenant-not-found
+    publicationStatus: published
+    publicClaim: Cross-tenant requests return 404.
+    evidenceType: repository
+    provenance: Approved request-boundary source and test review
     attribution: I inherited an earlier prototype and led the current Laravel-based MyConference rebuild. I made the final product and engineering decisions while using AI-assisted development tools.
     publicationApproved: true
     qualifier: Source and documentation snapshot verified 30 August 2026
@@ -201,10 +241,30 @@ blocks:
     rationale: The application and database boundaries cover different access paths.
     result: Missing Organisation context returns no tenant rows, and cross-tenant requests return 404.
     evidenceReferences:
-      - tenant-isolation
+      - tenant-table-ownership
+      - composite-tenant-keys
+      - application-tenant-scopes
+      - forced-row-level-security
+      - missing-organisation-context
+      - cross-tenant-not-found
   - type: verified-fact
     evidenceReferences:
-      - tenant-isolation
+      - tenant-table-ownership
+  - type: verified-fact
+    evidenceReferences:
+      - composite-tenant-keys
+  - type: verified-fact
+    evidenceReferences:
+      - application-tenant-scopes
+  - type: verified-fact
+    evidenceReferences:
+      - forced-row-level-security
+  - type: verified-fact
+    evidenceReferences:
+      - missing-organisation-context
+  - type: verified-fact
+    evidenceReferences:
+      - cross-tenant-not-found
   - type: engineering-decision
     situation: Organisation ownership and access to confidential Conference material are separate responsibilities.
     choice: Organisation ownership does not grant confidential access. An audited Conference Chair Role Assignment grants it.

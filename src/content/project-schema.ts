@@ -242,10 +242,22 @@ const myConferenceProhibitedClaimPatterns = [
   ),
 ];
 
-const currentSuitePerformancePatterns = [
-  /\bcurrent(?:ly)?\b[\s\S]{0,50}\b(?:PHP )?test(?:-suite)?(?: run)?\b/i,
-  /\b(?:PHP )?(?:test(?:-suite)?(?: performance| run)?|suite)\b[\s\S]{0,40}\b(?:is\s+)?(?:current(?:ly)?|now|today|latest)\b/i,
-];
+function claimsCurrentSuitePerformance(publicationText: string): boolean {
+  const currentState = /\b(?:current(?:ly)?|latest|now|today|at present)\b/i;
+  const testSuite =
+    /\b(?:PHP\s+)?(?:test(?:-suite)?(?:\s+(?:run|suite|performance))?|suite)\b/i;
+  const measuredResult =
+    /\b(?:pass(?:ed|es|ing)?|runs?|takes?|seconds?|minutes?|hours?|performance|migrations?|assertions?)\b|\d/i;
+
+  return publicationText
+    .split(/(?<=[.!?])\s+|\n+/)
+    .some(
+      (claim) =>
+        currentState.test(claim) &&
+        testSuite.test(claim) &&
+        measuredResult.test(claim),
+    );
+}
 
 function featuredBlockPublicationText(
   block: z.infer<typeof featuredBlockSchema>,
@@ -335,23 +347,7 @@ export const projectSchema = z
       });
     }
 
-    const metricText = [
-      ...project.evidence
-        .filter((evidence) => evidence.evidenceType === "measurement")
-        .map((evidence) => evidence.publicClaim),
-      ...(project.projectType === "featured"
-        ? project.blocks.flatMap((block) =>
-            block.type === "metric"
-              ? [block.comparison, block.unit, block.qualifier]
-              : [],
-          )
-        : []),
-    ].join("\n");
-    if (
-      currentSuitePerformancePatterns.some((pattern) =>
-        pattern.test(metricText),
-      )
-    ) {
+    if (claimsCurrentSuitePerformance(publicationText)) {
       context.addIssue({
         code: "custom",
         message:
@@ -466,17 +462,25 @@ export function selectPublishedProjects(
     }
 
     if (entry.data.projectType === "featured") {
-      const verifiedFactClaims = new Set<string>();
+      const verifiedFactClaims = new Map<string, string>();
 
       for (const block of entry.data.blocks) {
         if (block.type === "verified-fact") {
           const [evidenceId] = block.evidenceReferences;
-          if (verifiedFactClaims.has(evidenceId)) {
+          const evidence = evidenceById.get(evidenceId);
+          if (!evidence) {
+            continue;
+          }
+          const claimKey = evidence.publicClaim
+            .trim()
+            .replace(/\s+/g, " ")
+            .toLocaleLowerCase("en");
+          if (verifiedFactClaims.has(claimKey)) {
             throw new Error(
-              `Project "${entry.data.projectSlug}" duplicates Verified fact claim "${evidenceId}"`,
+              `Project "${entry.data.projectSlug}" duplicates Verified fact claim "${evidence.publicClaim}"`,
             );
           }
-          verifiedFactClaims.add(evidenceId);
+          verifiedFactClaims.set(claimKey, evidenceId);
         }
 
         if (block.type === "workflow") {
